@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.robotcontroller.external.samples;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -37,6 +39,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
+import java.util.Locale;
 
 /**
  * This file illustrates the concept of driving a path based on Gyro heading and encoder counts.
@@ -71,19 +82,22 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Squish: Auto Drive By Gyro", group="Linear OpMode")
+@Autonomous(name="Squish: Auto Drive By Gyro :)", group="Linear OpMode")
 
 public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
     /* Declare OpMode members. */
-    HardwarePushbot         robot   = new HardwarePushbot();   // Use a Pushbot's hardware
-    ModernRoboticsI2cGyro   gyro    = null;                    // Additional Gyro device
+    //HardwarePushbot         robot   = new HardwarePushbot();   // Use a Pushbot's hardware
+    //ModernRoboticsI2cGyro   gyro    = null;                    // Additional Gyro device
+    BNO055IMU gyro;
+    Orientation angles;
+    Acceleration gravity;
 
     static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;    // eg: TETRIX Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
-    static final double     WHEEL_DIAMETER_INCHES   = 3.5 ;     // For figuring circumference
+    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP CHANGE ME IF CRAP GETS WILD
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-                                                      (WHEEL_DIAMETER_INCHES * 3.1415);
+            (WHEEL_DIAMETER_INCHES * 3.1415);
 
     // These constants define the desired driving/control characteristics
     // The can/should be tweaked to suite the specific robot drive train.
@@ -107,8 +121,17 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
          * Initialize the standard drive system variables.
          * The init() method of the hardware class does most of the work here
          */
-        robot.init(hardwareMap);
-        gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
+        //robot.init(hardwareMap);
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        gyro = hardwareMap.get(BNO055IMU.class, "gyro");
+
 
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
@@ -117,8 +140,8 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
 
         leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftRear.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
         rightRear.setDirection((DcMotorSimple.Direction.REVERSE));
 
         // Ensure the robot it stationary, then reset the encoders and calibrate the gyro.
@@ -131,10 +154,10 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         telemetry.addData(">", "Calibrating Gyro");    //
         telemetry.update();
 
-        gyro.calibrate();
-
+        //gyro.calibrate();
+        gyro.initialize(parameters);
         // make sure the gyro is calibrated before continuing
-        while (!isStopRequested() && gyro.isCalibrating())  {
+        while (!isStopRequested() && gyro.isGyroCalibrated())  {
             sleep(50);
             idle();
         }
@@ -147,44 +170,51 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+
+
         // Wait for the game to start (Display Gyro value), and reset gyro before we move..
         while (!isStarted()) {
-            telemetry.addData(">", "Robot Heading = %d", gyro.getIntegratedZValue());
+            composeTelemetry();
+            telemetry.addLine("Waiting to start");
             telemetry.update();
         }
 
-        gyro.resetZAxisIntegrator();
+        while(opModeIsActive()) {
+            composeTelemetry();
 
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        // Put a hold after each turn
-        gyroDrive(DRIVE_SPEED, 48.0, 0.0);    // Drive FWD 48 inches
-        gyroTurn( TURN_SPEED, -45.0);         // Turn  CCW to -45 Degrees
-        gyroHold( TURN_SPEED, -45.0, 0.5);    // Hold -45 Deg heading for a 1/2 second
-        gyroDrive(DRIVE_SPEED, 12.0, -45.0);  // Drive FWD 12 inches at 45 degrees
-        gyroTurn( TURN_SPEED,  45.0);         // Turn  CW  to  45 Degrees
-        gyroHold( TURN_SPEED,  45.0, 0.5);    // Hold  45 Deg heading for a 1/2 second
-        gyroTurn( TURN_SPEED,   0.0);         // Turn  CW  to   0 Degrees
-        gyroHold( TURN_SPEED,   0.0, 1.0);    // Hold  0 Deg heading for a 1 second
-        gyroDrive(DRIVE_SPEED,-48.0, 0.0);    // Drive REV 48 inches
 
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
+            // Step through each leg of the path,
+            // Note: Reverse movement is obtained by setting a negative distance (not speed)
+            // Put a hold after each turn
+
+//        gyroDrive(DRIVE_SPEED, 10.0, 0.0);    // Drive FWD 48 inches
+//        gyroTurn( TURN_SPEED, -45.0);         // Turn  CCW to -45 Degrees
+//        gyroHold( TURN_SPEED, -45.0, 0.5);    // Hold -45 Deg heading for a 1/2 second
+//        gyroDrive(DRIVE_SPEED, 12.0, -45.0);  // Drive FWD 12 inches at 45 degrees
+//        gyroTurn( TURN_SPEED,  45.0);         // Turn  CW  to  45 Degrees
+//        gyroHold( TURN_SPEED,  45.0, 0.5);    // Hold  45 Deg heading for a 1/2 second
+//        gyroTurn( TURN_SPEED,   0.0);         // Turn  CW  to   0 Degrees
+//        gyroHold( TURN_SPEED,   0.0, 1.0);    // Hold  0 Deg heading for a 1 second
+//        gyroDrive(DRIVE_SPEED,-48.0, 0.0);    // Drive REV 48 inches
+
+           // telemetry.addData("Path", "Complete");
+            telemetry.update();
+        }
     }
 
 
-   /**
-    *  Method to drive on a fixed compass bearing (angle), based on encoder counts.
-    *  Move will stop if either of these conditions occur:
-    *  1) Move gets to the desired position
-    *  2) Driver stops the opmode running.
-    *
-    * @param speed      Target speed for forward motion.  Should allow for _/- variance for adjusting heading
-    * @param distance   Distance (in inches) to move from current position.  Negative distance means move backwards.
-    * @param angle      Absolute Angle (in Degrees) relative to last gyro reset.
-    *                   0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
-    *                   If a relative angle is required, add/subtract from current heading.
-    */
+    /**
+     *  Method to drive on a fixed compass bearing (angle), based on encoder counts.
+     *  Move will stop if either of these conditions occur:
+     *  1) Move gets to the desired position
+     *  2) Driver stops the opmode running.
+     *
+     * @param speed      Target speed for forward motion.  Should allow for _/- variance for adjusting heading
+     * @param distance   Distance (in inches) to move from current position.  Negative distance means move backwards.
+     * @param angle      Absolute Angle (in Degrees) relative to last gyro reset.
+     *                   0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
+     *                   If a relative angle is required, add/subtract from current heading.
+     */
     public void gyroDrive ( double speed,
                             double distance,
                             double angle) {
@@ -226,7 +256,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
             rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // start motion.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            speed = Range.clip(Math.abs(speed), 0.0, 0.5);
             leftFront.setPower(speed);
             leftRear.setPower(speed);
             rightFront.setPower(speed);
@@ -235,7 +265,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
-                   (robot.leftDrive.isBusy() && robot.rightDrive.isBusy())) {
+                    (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy())) {
 
                 // adjust relative speed based on heading error.
                 error = getError(angle);
@@ -267,9 +297,10 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                 // Display drive status for the driver.
                 telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, steer);
                 telemetry.addData("Target",  "%7d:%7d",      newLeftFrontTarget,  newRightFrontTarget);
-                telemetry.addData("Actual",  "%7d:%7d",      robot.leftDrive.getCurrentPosition(),
-                                                             robot.rightDrive.getCurrentPosition());
+                telemetry.addData("Actual",  "%7d:%7d",      leftFront.getCurrentPosition(),
+                        rightFront.getCurrentPosition());
                 telemetry.addData("Speed",   "%5.2f:%5.2f",  leftFrontSpeed, rightFrontSpeed);
+                telemetry.addData(">", "Robot Heading = %d", gyro.getAngularOrientation());
                 telemetry.update();
             }
 
@@ -304,6 +335,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         // keep looping while we are still active, and not on heading.
         while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
             // Update telemetry & Allow time for other processes to run.
+            telemetry.addData(">", "Robot Heading = %d", gyro.getAngularOrientation().firstAngle);                telemetry.update();
             telemetry.update();
         }
     }
@@ -402,7 +434,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         double robotError;
 
         // calculate error in -179 to +180 range  (
-        robotError = targetAngle - gyro.getIntegratedZValue();
+        robotError = targetAngle - gyro.getAngularOrientation().firstAngle;
         while (robotError > 180)  robotError -= 360;
         while (robotError <= -180) robotError += 360;
         return robotError;
@@ -417,5 +449,71 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
     }
+
+    String formatAngle(AngleUnit angleUnit, double angle) {
+        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
+
+    String formatDegrees(double degrees){
+        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+            void composeTelemetry() {
+
+                // At the beginning of each telemetry update, grab a bunch of data
+                // from the IMU that we will then display in separate lines.
+                telemetry.addAction(new Runnable() { @Override public void run()
+                {
+                    // Acquiring the angles is relatively expensive; we don't want
+                    // to do that in each of the three items that need that info, as that's
+                    // three times the necessary expense.
+                    angles   = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                    gravity  = gyro.getGravity();
+                }
+                });
+
+                telemetry.addLine()
+                        .addData("status", new Func<String>() {
+                            @Override public String value() {
+                                return gyro.getSystemStatus().toShortString();
+                            }
+                        })
+                        .addData("calib", new Func<String>() {
+                            @Override public String value() {
+                                return gyro.getCalibrationStatus().toString();
+                            }
+                        });
+
+                telemetry.addLine()
+                        .addData("heading", new Func<String>() {
+                            @Override public String value() {
+                                return formatAngle(angles.angleUnit, angles.firstAngle);
+                            }
+                        })
+                        .addData("roll", new Func<String>() {
+                            @Override public String value() {
+                                return formatAngle(angles.angleUnit, angles.secondAngle);
+                            }
+                        })
+                        .addData("pitch", new Func<String>() {
+                            @Override public String value() {
+                                return formatAngle(angles.angleUnit, angles.thirdAngle);
+                            }
+                        });
+
+                telemetry.addLine()
+                        .addData("grvty", new Func<String>() {
+                            @Override public String value() {
+                                return gravity.toString();
+                            }
+                        })
+                        .addData("mag", new Func<String>() {
+                            @Override public String value() {
+                                return String.format(Locale.getDefault(), "%.3f",
+                                        Math.sqrt(gravity.xAccel*gravity.xAccel
+                                                + gravity.yAccel*gravity.yAccel
+                                                + gravity.zAccel*gravity.zAccel));
+                            }
+                        });
+            }
 
 }
