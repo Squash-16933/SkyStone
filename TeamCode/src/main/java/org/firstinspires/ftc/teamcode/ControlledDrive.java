@@ -66,9 +66,9 @@ public class ControlledDrive extends OpMode {
          * Initialize motors, servos, and controllers with hardwareMap
          */
         leftFront.setDirection(DcMotor.Direction.FORWARD);
-        leftRear.setDirection(DcMotor.Direction.REVERSE);
-        rightFront.setDirection(DcMotor.Direction.FORWARD);
-        rightRear.setDirection(DcMotor.Direction.FORWARD);
+        leftRear.setDirection(DcMotor.Direction.FORWARD);
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        rightRear.setDirection(DcMotor.Direction.REVERSE);
 
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -123,8 +123,8 @@ public class ControlledDrive extends OpMode {
         }
 
         double driveY = -gamepad1.left_stick_y;
-        double driveX = gamepad1.left_stick_x;
-        double turn = gamepad1.right_stick_x;
+        double driveX = -gamepad1.left_stick_x;
+        double turn = -gamepad1.right_stick_x;
 
         double leftFrontPower = Range.clip((driveY + driveX) + turn, -1.0, 1.0);
         double leftRearPower = Range.clip((driveY - driveX) + turn, -1.0, 1.0);
