@@ -51,6 +51,9 @@ public class ControlledDrive extends OpMode {
     private DcMotor rightFront = null;  // green - port 3
     private DcMotor rightRear = null;   // blue - port 0
 
+    private Servo rightTwist = null;
+    private Servo leftTwist = null;
+
 
     @Override
     public void init() {
@@ -62,6 +65,11 @@ public class ControlledDrive extends OpMode {
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
+
+
+        rightTwist = hardwareMap.get(Servo.class, "rightTwist");
+        leftTwist = hardwareMap.get(Servo.class, "leftTwist");
+
         /*
          * Initialize motors, servos, and controllers with hardwareMap
          */
@@ -139,6 +147,25 @@ public class ControlledDrive extends OpMode {
          * Set controls on gamepads and update/set position of servos with delta variables
          *
          */
+
+        if(gamepad1.dpad_down){
+            rightTwist.setPosition(0);
+            leftTwist.setPosition(0);
+        }
+        if(gamepad1.dpad_right){
+            rightTwist.setPosition(1);
+            leftTwist.setPosition(0);
+        }
+        if(gamepad1.dpad_left){
+            rightTwist.setPosition(0);
+            leftTwist.setPosition(1);
+        }
+        if(gamepad1.dpad_up){
+            rightTwist.setPosition(1);
+            leftTwist.setPosition(1);
+        }
+
+
 
     }
 
