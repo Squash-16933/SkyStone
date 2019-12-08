@@ -148,24 +148,37 @@ public class ControlledDrive extends OpMode {
          *
          */
 
-        if(gamepad1.dpad_down){
+//        if(gamepad1.dpad_down){
+//            rightTwist.setPosition(0);
+//            leftTwist.setPosition(0);
+//        }
+//        if(gamepad1.dpad_right){
+//            rightTwist.setPosition(1);
+//            leftTwist.setPosition(0);
+//        }
+//        if(gamepad1.dpad_left){
+//            rightTwist.setPosition(0);
+//            leftTwist.setPosition(1);
+//        }
+//        if(gamepad1.dpad_up){
+//            rightTwist.setPosition(1);
+//            leftTwist.setPosition(1);
+//        }
+
+        if (gamepad1.dpad_up) {
+            rightTwist.setPosition(0.5);
+            leftTwist.setPosition(0.5);
+            telemetry.addLine("0.5");
+        } else if (gamepad1.dpad_left) {
+            rightTwist.setPosition(1);
+            leftTwist.setPosition(1);
+            telemetry.addLine("1");
+        } else if (gamepad1.dpad_right) {
             rightTwist.setPosition(0);
             leftTwist.setPosition(0);
+            telemetry.addLine("0");
         }
-        if(gamepad1.dpad_right){
-            rightTwist.setPosition(1);
-            leftTwist.setPosition(0);
-        }
-        if(gamepad1.dpad_left){
-            rightTwist.setPosition(0);
-            leftTwist.setPosition(1);
-        }
-        if(gamepad1.dpad_up){
-            rightTwist.setPosition(1);
-            leftTwist.setPosition(1);
-        }
-
-
+        telemetry.update();
 
     }
 
