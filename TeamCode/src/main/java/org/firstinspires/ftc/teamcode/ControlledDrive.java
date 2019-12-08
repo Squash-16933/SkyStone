@@ -54,6 +54,10 @@ public class ControlledDrive extends OpMode {
     private Servo rightTwist = null;
     private Servo leftTwist = null;
 
+    private Servo rampServo = null;
+    private double rampPos = 0.4;
+
+    private static final double RAMP_SERVO_INCREMENT = 0.001;
 
     @Override
     public void init() {
@@ -66,9 +70,11 @@ public class ControlledDrive extends OpMode {
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
 
-
         rightTwist = hardwareMap.get(Servo.class, "rightTwist");
         leftTwist = hardwareMap.get(Servo.class, "leftTwist");
+
+        rampServo = hardwareMap.get(Servo.class, "rampServo");
+        rampServo.setPosition(rampPos);
 
         /*
          * Initialize motors, servos, and controllers with hardwareMap
@@ -88,6 +94,10 @@ public class ControlledDrive extends OpMode {
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // set twisters to up position
+        rightTwist.setPosition(0);
+        leftTwist.setPosition(1);
     }
 
 
@@ -143,45 +153,40 @@ public class ControlledDrive extends OpMode {
         leftRear.setPower(leftRearPower / control);
         rightFront.setPower(rightFrontPower / control);
         rightRear.setPower(rightRearPower / control);
+
         /*
          * Set controls on gamepads and update/set position of servos with delta variables
          *
          */
 
-//        if(gamepad1.dpad_down){
-//            rightTwist.setPosition(0);
-//            leftTwist.setPosition(0);
-//        }
-//        if(gamepad1.dpad_right){
-//            rightTwist.setPosition(1);
-//            leftTwist.setPosition(0);
-//        }
-//        if(gamepad1.dpad_left){
-//            rightTwist.setPosition(0);
-//            leftTwist.setPosition(1);
-//        }
-//        if(gamepad1.dpad_up){
-//            rightTwist.setPosition(1);
-//            leftTwist.setPosition(1);
-//        }
-
-        if (gamepad1.dpad_up) {
+        // twisters
+        if (gamepad1.dpad_down) {
             rightTwist.setPosition(0.5);
             leftTwist.setPosition(0.5);
-            telemetry.addLine("0.5");
-        } else if (gamepad1.dpad_left) {
-            rightTwist.setPosition(1);
-            leftTwist.setPosition(1);
-            telemetry.addLine("1");
-        } else if (gamepad1.dpad_right) {
+        } else if (gamepad1.dpad_up) {
             rightTwist.setPosition(0);
-            leftTwist.setPosition(0);
-            telemetry.addLine("0");
+            leftTwist.setPosition(1);
         }
+
+        //ramp servo
+        if (gamepad1.y) {
+            //rampPos += RAMP_SERVO_INCREMENT;
+            rampPos = 1;
+        } else if (gamepad1.a) {
+            //rampPos -= RAMP_SERVO_INCREMENT;
+            rampPos = 0.4;
+        }
+//        if (rampPos > 1) {
+//            rampPos = 1;
+//        } else if (rampPos < 0) {
+//            rampPos = 0;
+//        }
+        telemetry.addData("Ramp Position", rampPos);
+        rampServo.setPosition(rampPos);
+
         telemetry.update();
 
     }
-
 
     @Override
     public void stop() {
