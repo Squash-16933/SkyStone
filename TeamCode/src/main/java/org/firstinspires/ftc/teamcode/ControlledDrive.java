@@ -175,6 +175,8 @@ public class ControlledDrive extends OpMode {
         } else if (gamepad1.a) {
             //rampPos -= RAMP_SERVO_INCREMENT;
             rampPos = 0.4;
+        } else if (gamepad1.x) {
+            rampPos = 0.55;
         }
 //        if (rampPos > 1) {
 //            rampPos = 1;

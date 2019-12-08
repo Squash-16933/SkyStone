@@ -115,7 +115,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     private DcMotor rightRear = null;
 
     private Servo rampServo = null;
-    private double rampPos = 0.4;
+    private double rampPos = 1;
 
 
 
@@ -143,7 +143,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear= hardwareMap.get(DcMotor.class, "rightRear");
 
-        rampServo = hardwareMap.get(Servo.class, "rampServo"); // setting ramp position 
+        rampServo = hardwareMap.get(Servo.class, "rampServo"); // setting ramp position
         rampServo.setPosition(rampPos);
 
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -201,16 +201,16 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         telemetry.update();
 
         gyroDrive(DRIVE_SPEED, 96, 0);   // forward 96 inches
-        gyroHold(TURN_SPEED, 0, 1);
+        gyroHold(1, 0, 1);
 
         gyroStrafe(DRIVE_SPEED, 96, 0);  // strafing right 96 inches
-        gyroHold(TURN_SPEED, 0, 5);
+        gyroHold(1, 0, 1);
 
         gyroDrive(DRIVE_SPEED, -96, 0);  // backwards 96 inches
-        gyroHold(TURN_SPEED, 0, 1);
+        gyroHold(1, 0, 1);
 
         gyroStrafe(DRIVE_SPEED, -96, 0); // strafing left 96 inches
-        gyroHold(TURN_SPEED, 0, 5);
+        gyroHold(1, 0, 1);
 
        // gyroDrive(DRIVE_SPEED, 72.0, 0.0);    // Drive FWD 48 inches
         //gyroTurn( TURN_SPEED, -45.0);         // Turn  CCW to -45 Degrees
