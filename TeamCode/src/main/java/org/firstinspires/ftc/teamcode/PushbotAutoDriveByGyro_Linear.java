@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -113,6 +114,10 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     private DcMotor rightFront = null;
     private DcMotor rightRear = null;
 
+    private Servo rampServo = null;
+    private double rampPos = 0.4;
+
+
 
     @Override
     public void runOpMode()  {
@@ -138,6 +143,8 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear= hardwareMap.get(DcMotor.class, "rightRear");
 
+        rampServo = hardwareMap.get(Servo.class, "rampServo"); // setting ramp position 
+        rampServo.setPosition(rampPos);
 
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
