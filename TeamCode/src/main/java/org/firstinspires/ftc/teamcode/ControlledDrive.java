@@ -51,6 +51,13 @@ public class ControlledDrive extends OpMode {
     private DcMotor rightFront = null;  // green - port 3
     private DcMotor rightRear = null;   // blue - port 0
 
+    private Servo rightTwist = null;
+    private Servo leftTwist = null;
+
+    private Servo rampServo = null;
+    private double rampPos = 0.4;
+
+    private static final double RAMP_SERVO_INCREMENT = 0.001;
 
     @Override
     public void init() {
@@ -62,6 +69,13 @@ public class ControlledDrive extends OpMode {
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
+
+        rightTwist = hardwareMap.get(Servo.class, "rightTwist");
+        leftTwist = hardwareMap.get(Servo.class, "leftTwist");
+
+        rampServo = hardwareMap.get(Servo.class, "rampServo");
+        rampServo.setPosition(rampPos);
+
         /*
          * Initialize motors, servos, and controllers with hardwareMap
          */
@@ -80,6 +94,10 @@ public class ControlledDrive extends OpMode {
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // set twisters to up position
+        rightTwist.setPosition(0);
+        leftTwist.setPosition(1);
     }
 
 
@@ -135,13 +153,40 @@ public class ControlledDrive extends OpMode {
         leftRear.setPower(leftRearPower / control);
         rightFront.setPower(rightFrontPower / control);
         rightRear.setPower(rightRearPower / control);
+
         /*
          * Set controls on gamepads and update/set position of servos with delta variables
          *
          */
 
-    }
+        // twisters
+        if (gamepad1.dpad_down) {
+            rightTwist.setPosition(0.5);
+            leftTwist.setPosition(0.5);
+        } else if (gamepad1.dpad_up) {
+            rightTwist.setPosition(0);
+            leftTwist.setPosition(1);
+        }
 
+        //ramp servo
+        if (gamepad1.y) {
+            //rampPos += RAMP_SERVO_INCREMENT;
+            rampPos = 1;
+        } else if (gamepad1.a) {
+            //rampPos -= RAMP_SERVO_INCREMENT;
+            rampPos = 0.4;
+        }
+//        if (rampPos > 1) {
+//            rampPos = 1;
+//        } else if (rampPos < 0) {
+//            rampPos = 0;
+//        }
+        telemetry.addData("Ramp Position", rampPos);
+        rampServo.setPosition(rampPos);
+
+        telemetry.update();
+
+    }
 
     @Override
     public void stop() {
