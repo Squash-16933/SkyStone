@@ -161,8 +161,8 @@ public class ControlledDrive extends OpMode {
             control = 1;
         }
 
-        double driveY = -gamepad1.left_stick_y;
-        double driveX = gamepad1.left_stick_x;
+        double driveY = gamepad1.left_stick_y;
+        double driveX = -gamepad1.left_stick_x;
         double turn = gamepad1.right_stick_x;
 
         double leftFrontPower = Range.clip((driveY + driveX) + turn, -1.0, 1.0);
