@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -57,6 +58,10 @@ public class ControlledDrive extends OpMode {
     private Servo rampServo = null;
     private double rampPos = 0.4;
 
+    private DcMotor rightIntake = null;
+    private DcMotor leftIntake = null;
+
+    private DigitalChannel stoneStop = null;
     private static final double RAMP_SERVO_INCREMENT = 0.001;
 
     @Override
@@ -76,6 +81,8 @@ public class ControlledDrive extends OpMode {
         rampServo = hardwareMap.get(Servo.class, "rampServo");
         rampServo.setPosition(rampPos);
 
+        rightIntake = hardwareMap.get(DcMotor.class, "rightIntake");
+        leftIntake = hardwareMap.get(DcMotor.class, "rightIntake");
         /*
          * Initialize motors, servos, and controllers with hardwareMap
          */
@@ -95,9 +102,23 @@ public class ControlledDrive extends OpMode {
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        //Intake setup
+        rightIntake.setDirection(DcMotor.Direction.REVERSE);
+        leftIntake.setDirection(DcMotor.Direction.FORWARD);
+
+
+        rightIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        rightIntake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftIntake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // set twisters to up position
         rightTwist.setPosition(0);
         leftTwist.setPosition(1);
+
+        //Intake stopper
+        stoneStop = hardwareMap.get(DigitalChannel.class, "stoneStop");
+        stoneStop.setMode(DigitalChannel.Mode.INPUT);
     }
 
 
@@ -186,10 +207,32 @@ public class ControlledDrive extends OpMode {
         telemetry.addData("Ramp Position", rampPos);
         rampServo.setPosition(rampPos);
 
+        //Intake/Outtake
+        if(gamepad2.left_trigger>0 && stoneStop.getState()) {
+            intake(true, true, gamepad2.left_trigger);
+        }
+        else if(gamepad2.right_trigger>0) {
+            intake(true, false, gamepad2.left_trigger);
+        }
+        else{
+            leftIntake.setPower(0);
+            rightIntake.setPower(0);
+        }
         telemetry.update();
 
     }
 
+    public void intake(boolean on, boolean in, float power) {
+        if (on == true) {
+            if (in) {
+                rightIntake.setPower(power);
+                leftIntake.setPower(power);
+            } else {
+                rightIntake.setPower(-power);
+                leftIntake.setPower(-power);
+            }
+        }
+    }
     @Override
     public void stop() {
 
@@ -202,6 +245,8 @@ public class ControlledDrive extends OpMode {
         rightFront.setPower(0);
         rightRear.setPower(0);
 
+        leftIntake.setPower(0);
+        rightIntake.setPower(0);
         // Return claw to normal position
 
         /*
