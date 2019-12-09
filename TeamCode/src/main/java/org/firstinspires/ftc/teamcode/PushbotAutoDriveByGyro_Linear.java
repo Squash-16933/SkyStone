@@ -49,39 +49,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import java.util.Locale;
 
-/**
- * This file illustrates the concept of driving a path based on Gyro heading and encoder counts.
- * It uses the common Pushbot hardware class to define the drive on the robot.
- * The code is structured as a LinearOpMode
- *
- * The code REQUIRES that you DO have encoders on the wheels,
- *   otherwise you would use: PushbotAutoDriveByTime;
- *
- *  This code ALSO requires that you have a Modern Robotics I2C gyro with the name "gyro"
- *   otherwise you would use: PushbotAutoDriveByEncoder;
- *
- *  This code requires that the drive Motors have been configured such that a positive
- *  power command moves them forward, and causes the encoders to count UP.
- *
- *  This code uses the RUN_TO_POSITION mode to enable the Motor controllers to generate the run profile
- *
- *  In order to calibrate the Gyro correctly, the robot must remain stationary during calibration.
- *  This is performed when the INIT button is pressed on the Driver Station.
- *  This code assumes that the robot is stationary when the INIT button is pressed.
- *  If this is not the case, then the INIT should be performed again.
- *
- *  Note: in this example, all angles are referenced to the initial coordinate frame set during the
- *  the Gyro Calibration process, or whenever the program issues a resetZAxisIntegrator() call on the Gyro.
- *
- *  The angle of movement/rotation is assumed to be a standardized rotation around the robot Z axis,
- *  which means that a Positive rotation is Counter Clock Wise, looking down on the field.
- *  This is consistent with the FTC field coordinate conventions set out in the document:
- *  ftc_app\doc\tutorial\FTC_FieldCoordinateSystemDefinition.pdf
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
-
 @Autonomous(name="Squish: Auto Drive By Gyro :)", group="Linear OpMode")
 
 public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
@@ -106,7 +73,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     static final double     TURN_SPEED              = 0.5;     // Nominal half speed for better accuracy.
 
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
-    static final double     P_TURN_COEFF            = 0.05;     // Larger is more responsive, but also less stable
+    static final double     P_TURN_COEFF            = 0.01;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.01;     // Larger is more responsive, but also less stable
 
     private DcMotor leftFront = null;
@@ -114,8 +81,11 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     private DcMotor rightFront = null;
     private DcMotor rightRear = null;
 
-    private Servo rampServo = null;
-    private double rampPos = 1;
+    private Servo rightTwist = null;
+    private Servo leftTwist = null;
+
+    //private Servo rampServo = null;
+   // private double rampPos = 1;
 
 
 
@@ -143,8 +113,14 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear= hardwareMap.get(DcMotor.class, "rightRear");
 
-        rampServo = hardwareMap.get(Servo.class, "rampServo"); // setting ramp position
-        rampServo.setPosition(rampPos);
+//        rampServo = hardwareMap.get(Servo.class, "rampServo"); // setting ramp position
+//        rampServo.setPosition(rampPos);
+//
+//        rightTwist = hardwareMap.get(Servo.class, "rightTwist");
+//        leftTwist = hardwareMap.get(Servo.class, "leftTwist");
+
+        //rightTwist.setPosition(0); // setting pos of twisters
+        //leftTwist.setPosition(1);
 
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -169,7 +145,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
             idle();
         }
 
-        telemetry.addData(">", "Robot Ready.");    //
+        telemetry.addData(">", "Robot Ready.");
         telemetry.update();
 
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -200,17 +176,19 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-        gyroDrive(DRIVE_SPEED, 96, 0);   // forward 96 inches
-        gyroHold(1, 0, 1);
+        moveBaseParkLeftBlue(0.4, 0.3);
 
-        gyroStrafe(DRIVE_SPEED, 96, 0);  // strafing right 96 inches
-        gyroHold(1, 0, 1);
-
-        gyroDrive(DRIVE_SPEED, -96, 0);  // backwards 96 inches
-        gyroHold(1, 0, 1);
-
-        gyroStrafe(DRIVE_SPEED, -96, 0); // strafing left 96 inches
-        gyroHold(1, 0, 1);
+//        gyroDrive(DRIVE_SPEED, 96, 0);   // forward 96 inches
+//        gyroHold(1, 0, 1);
+//
+//        gyroStrafe(DRIVE_SPEED, 96, 0);  // strafing right 96 inches
+//        gyroHold(1, 0, 1);
+//
+//        gyroDrive(DRIVE_SPEED, -96, 0);  // backwards 96 inches
+//        gyroHold(1, 0, 1);
+//
+//        gyroStrafe(DRIVE_SPEED, -96, 0); // strafing left 96 inches
+//        gyroHold(1, 0, 1);
 
        // gyroDrive(DRIVE_SPEED, 72.0, 0.0);    // Drive FWD 48 inches
         //gyroTurn( TURN_SPEED, -45.0);         // Turn  CCW to -45 Degrees
@@ -511,6 +489,16 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         rightFront.setPower(0);
         rightRear.setPower(0);
     }
+    public void baseGrabbers(boolean twist){ // Twisters
+        // twisters
+        if (twist == true) { // twist the things down to grab base
+            rightTwist.setPosition(0.5);
+            leftTwist.setPosition(0.5);
+        } else{
+            rightTwist.setPosition(0);
+            leftTwist.setPosition(1);
+        }
+    }
 
 
     /**
@@ -593,6 +581,44 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
     }
+
+
+    public void moveBaseParkLeftBlue(double driveSpeed, double turnSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
+        gyroStrafe(driveSpeed, -56, 0);
+        gyroHold(turnSpeed, 0, 2);
+
+        gyroDrive(driveSpeed, 35, 0);
+        gyroHold(turnSpeed, 0, 2);
+
+        gyroStrafe(driveSpeed, -5, 0);
+        gyroHold(turnSpeed, 0, 0);
+
+        //baseGrabbers(true);
+        gyroDrive(driveSpeed, -36, 0);
+        gyroHold(turnSpeed, 0, 2);
+
+        //baseGrabbers(false);
+        gyroStrafe(driveSpeed, 40, 0);
+        gyroHold(turnSpeed, 0, 2);
+
+    }
+    public void moveBaseParkLeftAlt(double driveSpeed, double turnSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
+        gyroDrive(driveSpeed, -56, 0);
+        gyroHold(turnSpeed, 0, 2);
+
+        gyroStrafe(driveSpeed, 35, 0);
+       
+
+    }
+    public void parkLeft(double driveSpeed, double turnSpeed){  //Will strafe left until passes under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
+        gyroStrafe(driveSpeed, -20, 0);
+        gyroHold(turnSpeed, 0, 2);
+    }
+    public void parkRight(double driveSpeed, double turnSpeed){  //Will strafe right until passes under bridge when placed on LEFT SIDE OF BLUE or LEFT SIDE OF RED
+        gyroStrafe(driveSpeed, 20, 0);
+        gyroHold(turnSpeed, 0, 2);
+    }
+
 
 
 
