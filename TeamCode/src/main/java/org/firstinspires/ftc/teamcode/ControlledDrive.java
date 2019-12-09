@@ -58,8 +58,8 @@ public class ControlledDrive extends OpMode {
     private Servo rampServo = null;
     private double rampPos = 0.4;
 
-    private DcMotor rightIntake = null;
-    private DcMotor leftIntake = null;
+    private DcMotor rightIntake = null; // port 0
+    private DcMotor leftIntake = null; // port 1
 
     private DigitalChannel stoneStop = null;
     private static final double RAMP_SERVO_INCREMENT = 0.001;
@@ -162,8 +162,8 @@ public class ControlledDrive extends OpMode {
         }
 
         double driveY = -gamepad1.left_stick_y;
-        double driveX = -gamepad1.left_stick_x;
-        double turn = -gamepad1.right_stick_x;
+        double driveX = gamepad1.left_stick_x;
+        double turn = gamepad1.right_stick_x;
 
         double leftFrontPower = Range.clip((driveY + driveX) + turn, -1.0, 1.0);
         double leftRearPower = Range.clip((driveY - driveX) + turn, -1.0, 1.0);
@@ -195,7 +195,7 @@ public class ControlledDrive extends OpMode {
             rampPos = 1;
         } else if (gamepad1.a) {
             //rampPos -= RAMP_SERVO_INCREMENT;
-            rampPos = 0.4;
+            rampPos = 0;
         } else if (gamepad1.x) {
             rampPos = 0.55;
         }
@@ -205,6 +205,7 @@ public class ControlledDrive extends OpMode {
 //            rampPos = 0;
 //        }
         telemetry.addData("Ramp Position", rampPos);
+        telemetry.update();
         rampServo.setPosition(rampPos);
 
         //Intake/Outtake

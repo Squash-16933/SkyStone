@@ -73,7 +73,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     static final double     TURN_SPEED              = 0.5;     // Nominal half speed for better accuracy.
 
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
-    static final double     P_TURN_COEFF            = 0.01;     // Larger is more responsive, but also less stable
+    static final double     P_TURN_COEFF            = 0.05;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.01;     // Larger is more responsive, but also less stable
 
     private DcMotor leftFront = null;
@@ -176,7 +176,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-        moveBaseParkLeftBlue(0.4, 0.3);
+        moveBaseParkLeftAlt(0.4, 0.3);
 
 //        gyroDrive(DRIVE_SPEED, 96, 0);   // forward 96 inches
 //        gyroHold(1, 0, 1);
@@ -603,13 +603,13 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
     }
     public void moveBaseParkLeftAlt(double driveSpeed, double turnSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
-       gyroStrafe(driveSpeed, -5.0, 0);
+       gyroStrafe(driveSpeed, -16.0, 0);
        gyroHold(turnSpeed, 0, 1);
 
-       gyroDrive(driveSpeed, -66, 0);
+       gyroDrive(driveSpeed, -80, 0);
        gyroHold(turnSpeed, 0, 1);
 
-       gyroStrafe(driveSpeed, -24, 0);
+       gyroStrafe(driveSpeed, -14, 0);
        gyroHold(turnSpeed, 0, 1);
 
        baseGrabbers(true);
