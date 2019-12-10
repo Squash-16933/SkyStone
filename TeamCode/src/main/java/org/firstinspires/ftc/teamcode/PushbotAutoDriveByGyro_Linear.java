@@ -176,7 +176,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-        moveBaseParkLeftAlt(0.4, 0.3);
+        moveBaseParkLeftAlt(0.7, 0.3);
 
 //        gyroDrive(DRIVE_SPEED, 96, 0);   // forward 96 inches
 //        gyroHold(1, 0, 1);
@@ -606,20 +606,20 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
        gyroStrafe(driveSpeed, -16.0, 0);
        gyroHold(turnSpeed, 0, 1);
 
-       gyroDrive(driveSpeed, -80, 0);
+       gyroDrive(driveSpeed, -90, 0);
        gyroHold(turnSpeed, 0, 1);
 
-       gyroStrafe(driveSpeed, -14, 0);
+       gyroStrafe(driveSpeed, -20, 0);
        gyroHold(turnSpeed, 0, 1);
 
        baseGrabbers(true);
        gyroHold(turnSpeed, 0, 1);
 
-       gyroStrafe(driveSpeed, 48, 0);
+       gyroStrafe(driveSpeed, 40, 0);
        baseGrabbers(false);
        gyroHold(turnSpeed, 0, 1);
 
-       gyroDrive(driveSpeed, 70, 0);
+       gyroDrive(driveSpeed, 50, 0);
     }
     public void parkLeft(double driveSpeed, double turnSpeed){  //Will strafe left until passes under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
         gyroStrafe(driveSpeed, -20, 0);
