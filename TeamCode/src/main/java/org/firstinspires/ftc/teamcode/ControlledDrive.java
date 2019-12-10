@@ -82,7 +82,7 @@ public class ControlledDrive extends OpMode {
         rampServo.setPosition(rampPos);
 
         rightIntake = hardwareMap.get(DcMotor.class, "rightIntake");
-        leftIntake = hardwareMap.get(DcMotor.class, "rightIntake");
+        leftIntake = hardwareMap.get(DcMotor.class, "leftIntake");
         /*
          * Initialize motors, servos, and controllers with hardwareMap
          */
@@ -103,15 +103,15 @@ public class ControlledDrive extends OpMode {
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //Intake setup
-        rightIntake.setDirection(DcMotor.Direction.REVERSE);
-        leftIntake.setDirection(DcMotor.Direction.FORWARD);
+        rightIntake.setDirection(DcMotor.Direction.FORWARD);
+        leftIntake.setDirection(DcMotor.Direction.REVERSE);
 
 
         rightIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        rightIntake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftIntake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // set twisters to up position
         rightTwist.setPosition(0);
         leftTwist.setPosition(1);
@@ -190,13 +190,13 @@ public class ControlledDrive extends OpMode {
         }
 
         //ramp servo
-        if (gamepad1.y) {
+        if (gamepad2.y) {
             //rampPos += RAMP_SERVO_INCREMENT;
             rampPos = 1;
-        } else if (gamepad1.a) {
+        } else if (gamepad2.a) {
             //rampPos -= RAMP_SERVO_INCREMENT;
-            rampPos = 0;
-        } else if (gamepad1.x) {
+            rampPos = 0.2;
+        } else if (gamepad2.x) {
             rampPos = 0.45;
         }
 //        if (rampPos > 1) {
@@ -209,11 +209,11 @@ public class ControlledDrive extends OpMode {
         rampServo.setPosition(rampPos);
 
         //Intake/Outtake
-        if(gamepad2.left_trigger>0 && stoneStop.getState()) {
+        if(gamepad2.left_trigger>0) {
             intake(true, true, gamepad2.left_trigger);
         }
         else if(gamepad2.right_trigger>0) {
-            intake(true, false, gamepad2.left_trigger);
+            intake(true, false, gamepad2.right_trigger);
         }
         else{
             leftIntake.setPower(0);
