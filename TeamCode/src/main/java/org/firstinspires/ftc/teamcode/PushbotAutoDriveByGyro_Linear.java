@@ -602,7 +602,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         gyroHold(turnSpeed, 0, 0);
 
         gyroStrafe(driveSpeed, -20, 0);
-        gyroHold(turnSpeed, 0, 0;
+        gyroHold(turnSpeed, 0, 0);
 
         baseGrabbers(true);
         gyroTurn(baseTurnSpeed, 90);
