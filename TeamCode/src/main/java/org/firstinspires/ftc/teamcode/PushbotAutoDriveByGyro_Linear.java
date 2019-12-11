@@ -176,31 +176,11 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-        moveBaseParkLeftAlt(0.7, 0.3, 0.9);
+       // moveBaseParkLeft(0.7, 0.3, 0.9);
 
-//        gyroDrive(DRIVE_SPEED, 96, 0);   // forward 96 inches
-//        gyroHold(1, 0, 1);
-//
-//        gyroStrafe(DRIVE_SPEED, 96, 0);  // strafing right 96 inches
-//        gyroHold(1, 0, 1);
-//
-//        gyroDrive(DRIVE_SPEED, -96, 0);  // backwards 96 inches
-//        gyroHold(1, 0, 1);
-//
-//        gyroStrafe(DRIVE_SPEED, -96, 0); // strafing left 96 inches
-//        gyroHold(1, 0, 1);
+       moveBaseParkLeftAltMethod(0.7, 0.5, 0.9, 0.8);
 
-       // gyroDrive(DRIVE_SPEED, 72.0, 0.0);    // Drive FWD 48 inches
-        //gyroTurn( TURN_SPEED, -45.0);         // Turn  CCW to -45 Degrees
-//        gyroHold( TURN_SPEED, -45.0, 0.5);    // Hold -45 Deg heading for a 1/2 second
-//        gyroDrive(DRIVE_SPEED, 12.0, -45.0);  // Drive FWD 12 inches at 45 degrees
-//        gyroTurn( TURN_SPEED,  45.0);         // Turn  CW  to  45 Degrees
-//        gyroHold( TURN_SPEED,  45.0, 0.5);    // Hold  45 Deg heading for a 1/2 second
-//        gyroTurn( TURN_SPEED,   0.0);         // Turn  CW  to   0 Degrees
-//        gyroHold( TURN_SPEED,   0.0, 1.0);    // Hold  0 Deg heading for a 1 second
-//        gyroDrive(DRIVE_SPEED,-48.0, 0.0);    // Drive REV 48 inches
 
-           // telemetry.addData("Path", "Complete");
             telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
             telemetry.update();
 
@@ -582,27 +562,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         return Range.clip(error * PCoeff, -1, 1);
     }
 
-
-    public void moveBaseParkLeftBlue(double driveSpeed, double turnSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
-        gyroStrafe(driveSpeed, -56, 0);
-        gyroHold(turnSpeed, 0, 2);
-
-        gyroDrive(driveSpeed, 35, 0);
-        gyroHold(turnSpeed, 0, 2);
-
-        gyroStrafe(driveSpeed, -5, 0);
-        gyroHold(turnSpeed, 0, 0);
-
-        baseGrabbers(true);
-        gyroDrive(driveSpeed, -36, 0);
-        gyroHold(turnSpeed, 0, 2);
-
-        baseGrabbers(false);
-        gyroStrafe(driveSpeed, 40, 0);
-        gyroHold(turnSpeed, 0, 2);
-
-    }
-    public void moveBaseParkLeftAlt(double driveSpeed, double turnSpeed, double baseDriveSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
+    public void moveBaseParkLeft(double driveSpeed, double turnSpeed, double baseDriveSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
        gyroStrafe(driveSpeed, -16.0, 0);
        gyroHold(turnSpeed, 0, 1);
 
@@ -621,17 +581,39 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
        gyroDrive(driveSpeed, 50, 0);
     }
-    public void parkLeft(double driveSpeed, double turnSpeed){  //Will strafe left until under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
+//    public void parkLeft(double driveSpeed, double turnSpeed){  //Will strafe left until under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
+//        gyroStrafe(driveSpeed, -20, 0);
+//        gyroHold(turnSpeed, 0, 2);
+//    }
+//    public void parkRight(double driveSpeed, double turnSpeed){  //Will strafe right until under bridge when placed on LEFT SIDE OF BLUE or LEFT SIDE OF RED
+//        gyroStrafe(driveSpeed, 20, 0);
+//        gyroHold(turnSpeed, 0, 2);
+//    }
+
+    public void moveBaseParkLeftAltMethod(double driveSpeed, double turnSpeed, double baseDriveSpeed, double baseTurnSpeed){ // increase baseDriveSpeed and baseTurnSpeed to account for the heaviness of the base
+
+        // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
+        // TO TURN LEFT MAKE THE ANGLE POSITIVE
+
+        gyroStrafe(driveSpeed, -16, 0);
+        gyroHold(turnSpeed, 0, 1);
+
+        gyroDrive(driveSpeed, -80, 0);
+        gyroHold(turnSpeed, 0, 0);
+
         gyroStrafe(driveSpeed, -20, 0);
-        gyroHold(turnSpeed, 0, 2);
+        gyroHold(turnSpeed, 0, 0;
+
+        baseGrabbers(true);
+        gyroTurn(baseTurnSpeed, 90);
+        gyroStrafe(baseDriveSpeed, -5, 0);
+        gyroDrive(baseDriveSpeed, -35, 0);
+        gyroStrafe(baseDriveSpeed, -7, 0);
+        baseGrabbers(false);
+
+        gyroDrive(driveSpeed, 57, 0);
+
     }
-    public void parkRight(double driveSpeed, double turnSpeed){  //Will strafe right until under bridge when placed on LEFT SIDE OF BLUE or LEFT SIDE OF RED
-        gyroStrafe(driveSpeed, 20, 0);
-        gyroHold(turnSpeed, 0, 2);
-    }
-
-
-
 
 
 }
