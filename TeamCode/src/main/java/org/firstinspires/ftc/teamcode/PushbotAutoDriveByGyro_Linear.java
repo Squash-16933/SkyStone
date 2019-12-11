@@ -179,7 +179,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
        // moveBaseParkLeft(0.7, 0.3, 0.9);
 
        moveBaseParkLeftAltMethod(0.7, 0.5, 0.9, 0.8);
-
+       
 
             telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
             telemetry.update();
@@ -581,14 +581,6 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
        gyroDrive(driveSpeed, 50, 0);
     }
-//    public void parkLeft(double driveSpeed, double turnSpeed){  //Will strafe left until under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
-//        gyroStrafe(driveSpeed, -20, 0);
-//        gyroHold(turnSpeed, 0, 2);
-//    }
-//    public void parkRight(double driveSpeed, double turnSpeed){  //Will strafe right until under bridge when placed on LEFT SIDE OF BLUE or LEFT SIDE OF RED
-//        gyroStrafe(driveSpeed, 20, 0);
-//        gyroHold(turnSpeed, 0, 2);
-//    }
 
     public void moveBaseParkLeftAltMethod(double driveSpeed, double turnSpeed, double baseDriveSpeed, double baseTurnSpeed){ // increase baseDriveSpeed and baseTurnSpeed to account for the heaviness of the base
 
@@ -615,5 +607,11 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
     }
 
+    public void parkLeft(double driveSpeed, double turnSpeed){  //Will strafe left until under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
+        gyroDrive(driveSpeed, -20, 0);
+    }
+    public void parkRight(double driveSpeed, double turnSpeed){  //Will strafe right until under bridge when placed on LEFT SIDE OF BLUE or LEFT SIDE OF RED
+        gyroDrive(driveSpeed, 20, 0);
+    }
 
 }
