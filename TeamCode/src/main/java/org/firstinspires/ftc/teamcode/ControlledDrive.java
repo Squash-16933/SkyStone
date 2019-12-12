@@ -199,6 +199,9 @@ public class ControlledDrive extends OpMode {
         } else if (gamepad2.x) {
             rampPos = 0.45;
         }
+        else if(gamepad2.b){
+            rampPos = 0.7;
+        }
 //        if (rampPos > 1) {
 //            rampPos = 1;
 //        } else if (rampPos < 0) {
@@ -210,10 +213,15 @@ public class ControlledDrive extends OpMode {
 
         //Intake/Outtake
         if(gamepad2.left_trigger>0) {
-            intake(true, true, gamepad2.left_trigger);
+            if(stoneStop.getState() == false){
+                intake(true, false, gamepad2.right_trigger, true);
+            }
+            else{
+                intake(true, true, gamepad2.left_trigger, false);
+            }
         }
         else if(gamepad2.right_trigger>0) {
-            intake(true, false, gamepad2.right_trigger);
+                intake(true, false, gamepad2.right_trigger, false);
         }
         else{
             leftIntake.setPower(0);
@@ -223,12 +231,17 @@ public class ControlledDrive extends OpMode {
 
     }
 
-    public void intake(boolean on, boolean in, float power) {
+    public void intake(boolean on, boolean in, float power, boolean stop) {
         if (on == true) {
             if (in) {
                 rightIntake.setPower(power);
                 leftIntake.setPower(power);
-            } else {
+            }
+            else if(stop == true){
+                rightIntake.setPower(0);
+                leftIntake.setPower(0);
+            }
+            else {
                 rightIntake.setPower(-power);
                 leftIntake.setPower(-power);
             }

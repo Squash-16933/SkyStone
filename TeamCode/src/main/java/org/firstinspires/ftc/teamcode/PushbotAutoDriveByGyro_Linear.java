@@ -281,6 +281,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                 rightFrontSpeed = speed + steer + accelSteer;
                 leftRearSpeed = speed - steer - accelSteer;
                 rightRearSpeed = speed + steer + accelSteer;
+                telemetry.addData("Acceleration Steer", accelSteer);
 
                 // Normalize speeds if either one exceeds +/- 1.0;
                 max = Math.max(Math.abs(leftFrontSpeed), Math.abs(rightFrontSpeed));
@@ -573,21 +574,21 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
     public void moveBaseParkLeft(double driveSpeed, double turnSpeed, double baseDriveSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
        gyroStrafe(driveSpeed, -16.0, 0);
-       gyroHold(turnSpeed, 0, 5);
+       gyroHold(turnSpeed, 0, 1);
 
 
-       gyroDrive(driveSpeed, -87, 0);
-       gyroHold(turnSpeed, 0, 5);
+       gyroDrive(driveSpeed, -73, 0);
+       gyroHold(turnSpeed, 0, 2);
 
-       gyroStrafe(driveSpeed, -18, 0);
-       gyroHold(turnSpeed, 0, 5);
+       gyroStrafe(driveSpeed, -16, 0);
+       gyroHold(turnSpeed, 0, 2);
 
        baseGrabbers(true);
-       gyroHold(turnSpeed, 0, 5);
+       gyroHold(turnSpeed, 0, 2);
 
        gyroStrafe(baseDriveSpeed, 50, 0); //Increased speed when moving base to account for the "heaviness"
        baseGrabbers(false);
-       gyroHold(turnSpeed, 0, 5);
+       gyroHold(turnSpeed, 0, 2);
 
        gyroDrive(driveSpeed, 50, 0);
     }
