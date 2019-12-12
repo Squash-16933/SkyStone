@@ -62,7 +62,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
     static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP CHANGE ME IF CRAP GETS WILD
-    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     WHEEL_DIAMETER_INCHES   = 3.5;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     WHEEL_ANGLE             = Math.PI/4;
@@ -75,6 +75,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
     static final double     P_TURN_COEFF            = 0.05;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.01;     // Larger is more responsive, but also less stable
+    static final double     P_DRIVE_ACCEL_COEFF     = 0.02;
 
     private DcMotor leftFront = null;
     private DcMotor leftRear = null;
@@ -160,6 +161,10 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
             telemetry.addLine("Waiting to start");
             telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
+
+            telemetry.addData("X accel:", gyro.getLinearAcceleration().xAccel);
+            telemetry.addData("Y accel: ", gyro.getLinearAcceleration().yAccel);
+
             telemetry.update();
         }
 
@@ -176,10 +181,10 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-       // moveBaseParkLeft(0.7, 0.3, 0.9);
+        moveBaseParkLeft(0.7, 0.3, 0.9);
 
-       moveBaseParkLeftAltMethod(0.7, 0.5, 0.9, 0.8);
-       
+       //moveBaseParkLeftAltMethod(0.7, 0.5, 0.9, 0.8);
+
 
             telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
             telemetry.update();
@@ -210,7 +215,9 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         int     moveCounts;
         double  max;
         double  error;
+        double  accelError;
         double  steer;
+        double  accelSteer;
         double  leftFrontSpeed;
         double  leftRearSpeed;
         double  rightFrontSpeed;
@@ -260,14 +267,20 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                 // adjust relative speed based on heading error.
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
+                accelError = getAccelError(angle, gyro.getLinearAcceleration().yAccel); // angle will almost alway be equal to 0 ---- angle is initialized when gyrodDrive is called.
+                accelSteer = getAccelSteer(accelError, P_DRIVE_ACCEL_COEFF);
+
 
                 // if driving in reverse, the motor correction also needs to be reversed
                 if (distance < 0) {
                     steer *= -1.0;
+                    accelSteer *= -1.0;
                 }
 
-                leftFrontSpeed = speed - steer;
-                rightFrontSpeed = speed + steer;
+                leftFrontSpeed = speed - steer - accelSteer;
+                rightFrontSpeed = speed + steer + accelSteer;
+                leftRearSpeed = speed - steer - accelSteer;
+                rightRearSpeed = speed + steer + accelSteer;
 
                 // Normalize speeds if either one exceeds +/- 1.0;
                 max = Math.max(Math.abs(leftFrontSpeed), Math.abs(rightFrontSpeed));
@@ -275,24 +288,16 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                 {
                     leftFrontSpeed /= max;
                     rightFrontSpeed /= max;
+                    leftRearSpeed /= max;
+                    rightRearSpeed /= max;
                 }
 
-                leftRearSpeed = leftFrontSpeed;
-                rightRearSpeed = rightFrontSpeed;
 
                 leftFront.setPower(leftFrontSpeed);
                 leftRear.setPower(leftRearSpeed);
                 rightFront.setPower(rightFrontSpeed);
                 rightRear.setPower(rightRearSpeed);
 
-                // Display drive status for the driver.
-//                telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, steer);
-//                telemetry.addData("Target",  "%7d:%7d",      newLeftFrontTarget,  newRightFrontTarget);
-//                telemetry.addData("Actual",  "%7d:%7d",      leftFront.getCurrentPosition(),
-//                        rightFront.getCurrentPosition());
-//                telemetry.addData("Speed",   "%5.2f:%5.2f",  leftFrontSpeed, rightFrontSpeed);
-//                telemetry.addData(">", "Robot Heading = %d", gyro.getAngularOrientation());
-//                telemetry.update();
             }
 
             // Stop all motion;
@@ -320,7 +325,9 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         int     moveCounts;
         double  max;
         double  error;
+        double  accelError;
         double  steer;
+        double  accelSteer;
         double  leftFrontSpeed;
         double  leftRearSpeed;
         double  rightFrontSpeed;
@@ -371,13 +378,18 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
 
+                accelError = getAccelError(angle, gyro.getLinearAcceleration().xAccel);
+                accelSteer = getAccelSteer(accelError, P_DRIVE_ACCEL_COEFF);
                 // if driving in reverse, the motor correction also needs to be reversed
                 if (distance < 0) {
                     steer *= -1.0;
+                    accelSteer *= -1.0;
                 }
 
-                rightFrontSpeed = speed - steer;
-                rightRearSpeed = speed + steer;
+                rightFrontSpeed = speed - steer + accelSteer;
+                rightRearSpeed = speed + steer + accelSteer;
+                leftFrontSpeed = speed - steer - accelSteer;
+                leftRearSpeed = speed + steer - accelSteer;
 
                 // Normalize speeds if either one exceeds +/- 1.0;
                 max = Math.max(Math.abs(rightFrontSpeed), Math.abs(rightRearSpeed));
@@ -385,24 +397,15 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                 {
                     rightFrontSpeed /= max;
                     rightRearSpeed /= max;
+                    leftFrontSpeed /= max;
+                    leftRearSpeed /= max;
                 }
-
-                leftRearSpeed = rightRearSpeed;
-                leftFrontSpeed = rightFrontSpeed;
 
                 leftFront.setPower(leftFrontSpeed);
                 leftRear.setPower(-leftRearSpeed);
                 rightFront.setPower(-rightFrontSpeed);
                 rightRear.setPower(rightRearSpeed);
 
-                // Display drive status for the driver.
-//                telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, steer);
-//                telemetry.addData("Target",  "%7d:%7d",      newLeftFrontTarget,  newRightFrontTarget);
-//                telemetry.addData("Actual",  "%7d:%7d",      leftFront.getCurrentPosition(),
-//                        rightFront.getCurrentPosition());
-//                telemetry.addData("Speed",   "%5.2f:%5.2f",  leftFrontSpeed, rightFrontSpeed);
-//                telemetry.addData(">", "Robot Heading = %d", gyro.getAngularOrientation());
-//                telemetry.update();
             }
 
             // Stop all motion;
@@ -527,11 +530,6 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         rightFront.setPower(rightFrontSpeed);
         rightRear.setPower(rightRearSpeed);
 
-        // Display it for the driver.
-//        telemetry.addData("Target", "%5.2f", angle);
-//        telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
-//        telemetry.addData("Speed.", leftFrontSpeed, rightFrontSpeed);
-
         return onTarget;
     }
 
@@ -551,6 +549,14 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         while (robotError <= -180) robotError += 360;
         return robotError;
     }
+    public double getAccelError(double targetAccel, double getLinearAccel){
+        double robotError;
+
+        robotError = targetAccel - getLinearAccel;
+        while (robotError > 0) robotError -= 1;
+        while (robotError < 0) robotError += 1;
+        return robotError;
+    }
 
     /**
      * returns desired steering force.  +/- 1 range.  +ve = steer left
@@ -561,51 +567,55 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
     }
+    public double getAccelSteer(double error, double PCoeff){
+        return Range.clip(error * PCoeff, -1, 1);
+    }
 
     public void moveBaseParkLeft(double driveSpeed, double turnSpeed, double baseDriveSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
        gyroStrafe(driveSpeed, -16.0, 0);
-       gyroHold(turnSpeed, 0, 1);
+       gyroHold(turnSpeed, 0, 5);
 
-       gyroDrive(driveSpeed, -80, 0);
-       gyroHold(turnSpeed, 0, 1);
 
-       gyroStrafe(driveSpeed, -20, 0);
-       gyroHold(turnSpeed, 0, 1);
+       gyroDrive(driveSpeed, -87, 0);
+       gyroHold(turnSpeed, 0, 5);
+
+       gyroStrafe(driveSpeed, -18, 0);
+       gyroHold(turnSpeed, 0, 5);
 
        baseGrabbers(true);
-       gyroHold(turnSpeed, 0, 1);
+       gyroHold(turnSpeed, 0, 5);
 
        gyroStrafe(baseDriveSpeed, 50, 0); //Increased speed when moving base to account for the "heaviness"
        baseGrabbers(false);
-       gyroHold(turnSpeed, 0, 1);
+       gyroHold(turnSpeed, 0, 5);
 
        gyroDrive(driveSpeed, 50, 0);
     }
 
-    public void moveBaseParkLeftAltMethod(double driveSpeed, double turnSpeed, double baseDriveSpeed, double baseTurnSpeed){ // increase baseDriveSpeed and baseTurnSpeed to account for the heaviness of the base
-
-        // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
-        // TO TURN LEFT MAKE THE ANGLE POSITIVE
-
-        gyroStrafe(driveSpeed, -16, 0);
-        gyroHold(turnSpeed, 0, 1);
-
-        gyroDrive(driveSpeed, -80, 0);
-        gyroHold(turnSpeed, 0, 0);
-
-        gyroStrafe(driveSpeed, -20, 0);
-        gyroHold(turnSpeed, 0, 0);
-
-        baseGrabbers(true);
-        gyroTurn(baseTurnSpeed, 90);
-        gyroStrafe(baseDriveSpeed, -5, 0);
-        gyroDrive(baseDriveSpeed, -35, 0);
-        gyroStrafe(baseDriveSpeed, -7, 0);
-        baseGrabbers(false);
-
-        gyroDrive(driveSpeed, 57, 0);
-
-    }
+//    public void moveBaseParkLeftAltMethod(double driveSpeed, double turnSpeed, double baseDriveSpeed, double baseTurnSpeed){ // increase baseDriveSpeed and baseTurnSpeed to account for the heaviness of the base
+//
+//        // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
+//        // TO TURN LEFT MAKE THE ANGLE POSITIVE
+//
+//        gyroStrafe(driveSpeed, -16, 0);
+//        gyroHold(turnSpeed, 0, 1);
+//
+//        gyroDrive(driveSpeed, -80, 0);
+//        gyroHold(turnSpeed, 0, 0);
+//
+//        gyroStrafe(driveSpeed, -20, 0);
+//        gyroHold(turnSpeed, 0, 0);
+//
+//        baseGrabbers(true);
+//        gyroTurn(baseTurnSpeed, 90);
+//        gyroStrafe(baseDriveSpeed, -5, 0);
+//        gyroDrive(baseDriveSpeed, -35, 0);
+//        gyroStrafe(baseDriveSpeed, -7, 0);
+//        baseGrabbers(false);
+//
+//        gyroDrive(driveSpeed, 57, 0);
+//
+//    }
 
     public void parkLeft(double driveSpeed, double turnSpeed){  //Will strafe left until under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
         gyroDrive(driveSpeed, -20, 0);
