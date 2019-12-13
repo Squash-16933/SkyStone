@@ -72,11 +72,11 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     static final double     TURN_SPEED              = 0.5;     // Nominal half speed for better accuracy.
 
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
-    static final double     P_TURN_COEFF            = 0.05;     // Larger is more responsive, but also less stable
-    static final double     P_DRIVE_COEFF           = 0.01;     // Larger is more responsive, but also less stable
-    static final double     P_DRIVE_ACCEL_COEFF     = 0.0;
-    static final double     DRIFT_ADJUST            = 0.9;
-    static final double     SPEED_INCR              = 0.01;
+    static final double     P_TURN_COEFF            = 0.1;     // Larger is more responsive, but also less stable
+    static final double     P_DRIVE_COEFF           = 0.15;     // Larger is more responsive, but also less stable
+    static final double     DRIFT_ADJUST            = 0.9;      // This constant will be used to adjust the speed for
+                                                                //  the leftFront and rightRear motors
+    static final double     SPEED_INCR              = 0.01;     // This constant is used to ramp-up the speed of the motors
 
     private DcMotor leftFront = null;
     private DcMotor leftRear = null;
@@ -162,12 +162,6 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
             telemetry.addLine("Waiting to start");
             telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
-
-            telemetry.addData("X accel:", gyro.getLinearAcceleration().xAccel);
-            telemetry.addData("Y accel: ", gyro.getLinearAcceleration().yAccel);
-//            telemetry.addData("X accel:", gyro.getGravity().xAccel);
-//            telemetry.addData("Y accel: ", gyro.getGravity().yAccel);
-
             telemetry.update();
         }
 
@@ -195,9 +189,9 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 //        gyroDrive(0.5,-100,0);
 //        gyroHold(0.5,0,2);
 
-
-        telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
-        telemetry.update();
+        // Commented these out as they would slow down the code.  To be used for debugging only
+//        telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
+//        telemetry.update();
 
     }
 
@@ -226,7 +220,6 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         int     moveCounts;
         double  maxF, maxR, max;
         double  error;
-        double  accelError;
         double  steer;
         double  accelSteer;
         double  leftFrontSpeed;
@@ -246,6 +239,8 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
 
             // Determine new target position, and pass to motor controller
+            //  The target positions for the leftFront and rightRear wheels are adjust by the
+            //  DRIFT_ADJUST (< 1) as these are the wheels that cause the robot to drift to the right
             moveCounts = (int)(distance * COUNTS_PER_INCH/Math.cos(WHEEL_ANGLE)/2);
             newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(moveCounts * DRIFT_ADJUST);
             newLeftRearTarget = leftRear.getCurrentPosition() + moveCounts;
@@ -264,8 +259,12 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
             rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            // start motion.
+            // start motion
+            //   The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
+            //   as these are the wheels that cause the robot to drift to the right.
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
+            //   suddenly causes the wheels to slip which in turn mess up the distance traveled.
             while (rampUpSpeed < speed) {
                 leftFront.setPower(rampUpSpeed * DRIFT_ADJUST);
                 leftRear.setPower(rampUpSpeed);
@@ -283,46 +282,28 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                 // adjust relative speed based on heading error.
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
-//                accelError = getAccelError(angle, gyro.getLinearAcceleration().yAccel); // angle will almost always be equal to 0 ---- angle is initialized when gyrodDrive is called.
-                accelError = gyro.getLinearAcceleration().yAccel;
-//                accelError = gyro.getGravity().yAccel;
-                accelSteer = getAccelSteer(accelError, P_DRIVE_ACCEL_COEFF);
-
 
                 // if driving in reverse, the motor correction also needs to be reversed
                 if (distance < 0) {
                     steer *= -1.0;
-                    accelSteer *= -1.0;
                 }
 
-                leftFrontSpeed = speed - steer + accelSteer;
-                rightFrontSpeed = speed + steer - accelSteer;
-                leftRearSpeed = speed - steer - accelSteer;
-                rightRearSpeed = speed + steer + accelSteer;
-                telemetry.addData("Angle Error", error);
-                telemetry.addData("Angle Steer", steer);
-                telemetry.addData("Y Acceleration Error", accelError);
-                telemetry.addData("Acceleration Steer", accelSteer);
-                telemetry.addLine("New Speeds ")
-                        .addData("LF", leftFrontSpeed)
-                        .addData("RF", rightFrontSpeed)
-                        .addData("LR", rightFrontSpeed)
-                        .addData("RR", rightFrontSpeed);
-                telemetry.update();
+                leftFrontSpeed = speed - steer;
+                rightFrontSpeed = speed + steer;
 
                 // Normalize speeds if either one exceeds +/- 1.0;
-                maxF = Math.max(Math.abs(leftFrontSpeed), Math.abs(rightFrontSpeed));
-                maxR = Math.max(Math.abs(leftRearSpeed), Math.abs(rightRearSpeed));
-                max = Math.max(maxF, maxR);
+                max = Math.max(Math.abs(leftFrontSpeed), Math.abs(rightFrontSpeed));
                 if (max > 1.0)
                 {
                     leftFrontSpeed /= max;
                     rightFrontSpeed /= max;
-                    leftRearSpeed /= max;
-                    rightRearSpeed /= max;
                 }
 
+                leftRearSpeed = leftFrontSpeed;
+                rightRearSpeed = rightFrontSpeed;
 
+                // The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
+                //   as these are the wheels that cause the robot to drift to the right.
                 leftFront.setPower(leftFrontSpeed*DRIFT_ADJUST);
                 leftRear.setPower(leftRearSpeed);
                 rightFront.setPower(rightFrontSpeed);
@@ -376,6 +357,8 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
 
             // Determine new target position, and pass to motor controller
+            //  The target positions for the leftFront and rightRear wheels are adjust by the
+            //  DRIFT_ADJUST (< 1) as these are the wheels that cause the robot to drift to the right
             moveCounts = (int)(distance * COUNTS_PER_INCH/Math.cos(WHEEL_ANGLE)/2);
             newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(moveCounts * DRIFT_ADJUST);
             newLeftRearTarget = leftRear.getCurrentPosition() + moveCounts;
@@ -395,7 +378,11 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
             rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // start motion.
+            //   The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
+            //   as these are the wheels that cause the robot to drift to the right.
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
+            //   suddenly causes the wheels to slip which in turn mess up the distance traveled.
             while (rampUpSpeed < speed) {
                 leftFront.setPower(rampUpSpeed * DRIFT_ADJUST);
                 leftRear.setPower(rampUpSpeed);
@@ -413,18 +400,13 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
 
-                accelError = getAccelError(angle, gyro.getLinearAcceleration().xAccel);
-                accelSteer = getAccelSteer(accelError, P_DRIVE_ACCEL_COEFF);
                 // if driving in reverse, the motor correction also needs to be reversed
                 if (distance < 0) {
                     steer *= -1.0;
-                    accelSteer *= -1.0;
                 }
 
-                rightFrontSpeed = speed - steer + accelSteer;
-                rightRearSpeed = speed + steer + accelSteer;
-                leftFrontSpeed = speed - steer - accelSteer;
-                leftRearSpeed = speed + steer - accelSteer;
+                rightFrontSpeed = speed - steer;
+                rightRearSpeed = speed + steer;
 
                 // Normalize speeds if either one exceeds +/- 1.0;
                 max = Math.max(Math.abs(rightFrontSpeed), Math.abs(rightRearSpeed));
@@ -432,9 +414,10 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                 {
                     rightFrontSpeed /= max;
                     rightRearSpeed /= max;
-                    leftFrontSpeed /= max;
-                    leftRearSpeed /= max;
                 }
+
+                leftFrontSpeed = rightFrontSpeed;
+                leftRearSpeed = rightRearSpeed;
 
                 leftFront.setPower(leftFrontSpeed * DRIFT_ADJUST);
                 leftRear.setPower(-leftRearSpeed);
@@ -584,14 +567,6 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         while (robotError <= -180) robotError += 360;
         return robotError;
     }
-    public double getAccelError(double targetAccel, double getLinearAccel){
-        double robotError;
-
-        robotError = targetAccel - getLinearAccel;
-        while (robotError > 0) robotError -= 1;
-        while (robotError < 0) robotError += 1;
-        return robotError;
-    }
 
     /**
      * returns desired steering force.  +/- 1 range.  +ve = steer left
@@ -600,9 +575,6 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
      * @return
      */
     public double getSteer(double error, double PCoeff) {
-        return Range.clip(error * PCoeff, -1, 1);
-    }
-    public double getAccelSteer(double error, double PCoeff){
         return Range.clip(error * PCoeff, -1, 1);
     }
 
