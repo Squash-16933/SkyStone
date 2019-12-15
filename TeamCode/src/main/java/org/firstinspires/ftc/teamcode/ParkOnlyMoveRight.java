@@ -46,9 +46,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import java.sql.Driver;
 
 
-@Autonomous(name="Squish: Auto Drive By Gyro :)", group="Linear OpMode")
+@Autonomous(name="Park Right", group="Linear OpMode")
 
-public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
+public class ParkOnlyMoveRight extends LinearOpMode {
 
     /* Declare OpMode members. */
     //HardwarePushbot         robot   = new HardwarePushbot();   // Use a Pushbot's hardware
@@ -72,9 +72,9 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     static final double     TURN_SPEED              = 0.5;     // Nominal half speed for better accuracy.
 
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
-    static final double     P_TURN_COEFF            = 0.02;     // Larger is more responsive, but also less stable
+    static final double     P_TURN_COEFF            = 0.03;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.02;     // Larger is more responsive, but also less stable
-    static final double     DRIFT_ADJUST            = 0.9;      // This constant will be used to adjust the speed for
+    static final double     DRIFT_ADJUST            = 0.75;      // This constant will be used to adjust the speed for
     //  the leftFront and rightRear motors
     static final double     SPEED_INCR              = 0.01;     // This constant is used to ramp-up the speed of the motors
 
@@ -166,33 +166,8 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         }
 
 
+        parkRight(0.7, 0.3);
 
-
-        // Step through each leg of the path,
-        // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        // Put a hold after each turn
-
-        // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
-        // TO TURN LEFT MAKE THE ANGLE POSITIVE
-
-        telemetry.addLine("Moving forward");
-        telemetry.update();
-
-        //moveBaseParkLeft(0.7, 0.3, 0.9);
-        moveBaseParkLeftAltMethod(0.7, 0.5, 0.9, 0.5);
-
-//        gyroDrive(0.5,100,0);
-//        gyroHold(0.5,0,2);
-//        gyroStrafe(0.5,-80,0);
-//        gyroHold(0.5,0,2);
-//        gyroStrafe(0.5,80,0);
-//        gyroHold(0.5,0,2);
-//        gyroDrive(0.5,-100,0);
-//        gyroHold(0.5,0,2);
-
-        // Commented these out as they would slow down the code.  To be used for debugging only
-//        telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
-//        telemetry.update();
 
     }
 
@@ -579,62 +554,14 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         return Range.clip(error * PCoeff, -1, 1);
     }
 
-//    public void moveBaseParkLeft(double driveSpeed, double turnSpeed, double baseDriveSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
-//        gyroStrafe(0.4, SPEED_INCR,-15.0 , 0);
-//        gyroHold(turnSpeed, 0, 1);
-//
-//
-//        gyroDrive(0.5, SPEED_INCR,-77, 0);
-//        gyroHold(turnSpeed, 0, 2);
-//
-//        gyroStrafe(0.4, SPEED_INCR,-17 / DRIFT_ADJUST, 0);
-//        gyroHold(turnSpeed, 0, 2);
-//
-//        baseGrabbers(true);
-//        gyroHold(turnSpeed, 0, 2);
-//
-//        gyroStrafe(baseDriveSpeed, .005,40, 0); //Increased speed when moving base to account for the "heaviness"
-//        baseGrabbers(false);
-//        gyroHold(turnSpeed, 0, 2);
-//
-//        gyroDrive(driveSpeed, SPEED_INCR, 45, 0);
-//        gyroHold(turnSpeed, 0, 2);
-//    }
 
-    public void moveBaseParkLeftAltMethod(double driveSpeed, double turnSpeed, double baseDriveSpeed, double baseTurnSpeed){ // increase baseDriveSpeed and baseTurnSpeed to account for the heaviness of the base
-
-        // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
-        // TO TURN LEFT MAKE THE ANGLE POSITIVE
-
-        gyroStrafe(0.4, SPEED_INCR,-15.0 , 0);
-        gyroHold(turnSpeed, 0, 1);
-
-        gyroDrive(0.5, SPEED_INCR,-77, 0);
-        gyroHold(turnSpeed, 0, 2);
-
-        gyroStrafe(0.4, SPEED_INCR,-17 / DRIFT_ADJUST, 0);
-        gyroHold(turnSpeed, 0, 2);
-
-        baseGrabbers(true);
-        gyroHold(turnSpeed, 0, 2);
-
-        gyroTurn(baseTurnSpeed, 90);
-        gyroHold(turnSpeed, 90, 3);
-        
-        gyroStrafe(baseDriveSpeed, SPEED_INCR, -5, 0);
-        gyroDrive(baseDriveSpeed, SPEED_INCR, -25, 0);
-        gyroStrafe(baseDriveSpeed,SPEED_INCR,  -7, 0);
-        baseGrabbers(false);
-
-        gyroDrive(driveSpeed, SPEED_INCR, 45, 0);
-
+    public void parkRight(double driveSpeed, double turnSpeed){  //Will strafe left until under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
+        gyroDrive(driveSpeed, SPEED_INCR, 3, 0);
+        gyroStrafe(driveSpeed, SPEED_INCR,30, 0);
     }
 
-    public void parkLeft(double driveSpeed, double turnSpeed){  //Will strafe left until under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
-        gyroDrive(driveSpeed, SPEED_INCR,-20, 0);
-    }
-    public void parkRight(double driveSpeed, double turnSpeed){  //Will strafe right until under bridge when placed on LEFT SIDE OF BLUE or LEFT SIDE OF RED
-        gyroDrive(driveSpeed, SPEED_INCR,20, 0);
-    }
+
+
+
 
 }
