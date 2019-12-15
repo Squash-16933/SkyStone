@@ -594,7 +594,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
         // TO TURN LEFT MAKE THE ANGLE POSITIVE
 
-        gyroDrive(driveSpeed, SPEED_INCR,45 / DRIFT_ADJUST, 0);
+        gyroDrive(driveSpeed, SPEED_INCR,65 / DRIFT_ADJUST, 0);
         gyroHold(turnSpeed, 0, 1);
 
         gyroStrafe(baseDriveSpeed, SPEED_INCR, -10, 90);
@@ -614,10 +614,11 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
 
         baseGrabbers(false);
 
-        gyroDrive(driveSpeed, SPEED_INCR, -40, 45);
+        gyroDrive(driveSpeed, SPEED_INCR, -55, 45);
+        gyroHold(turnSpeed, 45, 1);
 
-        gyroTurn(turnSpeed, 90);
-        gyroStrafe(driveSpeed, SPEED_INCR, -3, 90);
+        gyroTurn(turnSpeed, 0);
+        gyroStrafe(driveSpeed, SPEED_INCR, 3, 0);
 
     }
 

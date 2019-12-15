@@ -56,7 +56,7 @@ public class ControlledDrive extends OpMode {
     private Servo leftTwist = null;
 
     private Servo rampServo = null;
-    private double rampPos = 0.4;
+    private double rampPos = 1;
 
     private DcMotor rightIntake = null; // port 0
     private DcMotor leftIntake = null; // port 1
@@ -200,8 +200,9 @@ public class ControlledDrive extends OpMode {
             rampPos = 0.45;
         }
         else if(gamepad2.b){
-            rampPos = 0.7;
+            rampPos = 0.6;
         }
+
 //        if (rampPos > 1) {
 //            rampPos = 1;
 //        } else if (rampPos < 0) {
