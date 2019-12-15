@@ -557,7 +557,7 @@ public class ParkOnlyMoveRight extends LinearOpMode {
 
     public void parkRight(double driveSpeed, double turnSpeed){  //Will strafe left until under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
         gyroDrive(driveSpeed, SPEED_INCR, 3, 0);
-        gyroStrafe(driveSpeed, SPEED_INCR,30, 0);
+        gyroStrafe(driveSpeed, SPEED_INCR,25, 0);
     }
 
 
