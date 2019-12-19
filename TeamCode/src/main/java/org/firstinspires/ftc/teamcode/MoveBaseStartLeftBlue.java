@@ -74,7 +74,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
     static final double     P_TURN_COEFF            = 0.03;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.01;     // Larger is more responsive, but also less stable
-    static final double     DRIFT_ADJUST            = 0.75;      // This constant will be used to adjust the speed for
+    static final double     DRIFT_ADJUST            = 0.72;      // This constant will be used to adjust the speed for
     //  the leftFront and rightRear motors
     static final double     SPEED_INCR              = 0.01;     // This constant is used to ramp-up the speed of the motors
 
@@ -178,7 +178,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-        moveBaseStartLeft(0.7, 0.3, 0.9, 0.7);
+        moveBaseStartLeft(0.5, 0.3, 0.9, 0.7);
 
 
     }
@@ -594,7 +594,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
         // TO TURN LEFT MAKE THE ANGLE POSITIVE
 
-        gyroDrive(driveSpeed, SPEED_INCR,65 / DRIFT_ADJUST, 0);
+        gyroDrive(driveSpeed, SPEED_INCR,45 / DRIFT_ADJUST, 0);
         gyroHold(turnSpeed, 0, 1);
 
         gyroStrafe(baseDriveSpeed, SPEED_INCR, -10, 90);
