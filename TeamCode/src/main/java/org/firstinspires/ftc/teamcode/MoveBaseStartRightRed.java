@@ -46,9 +46,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import java.sql.Driver;
 
 
-@Autonomous(name="Park Base Starting Left Blue", group="Linear OpMode")
+@Autonomous(name="Park Base Starting Right Blue", group="Linear OpMode")
 
-public class MoveBaseStartLeftBlue extends LinearOpMode {
+public class MoveBaseStartRightRed extends LinearOpMode {
 
     /* Declare OpMode members. */
     //HardwarePushbot         robot   = new HardwarePushbot();   // Use a Pushbot's hardware
@@ -73,8 +73,8 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
 
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
     static final double     P_TURN_COEFF            = 0.03;     // Larger is more responsive, but also less stable
-    static final double     P_DRIVE_COEFF           = 0.01;     // Larger is more responsive, but also less stable
-    static final double     DRIFT_ADJUST            = 0.72;      // This constant will be used to adjust the speed for
+    static final double     P_DRIVE_COEFF           = 0.02;     // Larger is more responsive, but also less stable
+    static final double     DRIFT_ADJUST            = 0.75;      // This constant will be used to adjust the speed for
     //  the leftFront and rightRear motors
     static final double     SPEED_INCR              = 0.01;     // This constant is used to ramp-up the speed of the motors
 
@@ -178,8 +178,14 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-        moveBaseStartLeft(0.5, 0.3, 0.9, 0.7);
 
+        //PLACE ROBOT SO FRONT IS AGAINST THE WALL
+        moveBaseStartRight(0.7, 0.3, 0.9, 0.7);
+
+
+        // Commented these out as they would slow down the code.  To be used for debugging only
+//        telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
+//        telemetry.update();
 
     }
 
@@ -566,59 +572,40 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         return Range.clip(error * PCoeff, -1, 1);
     }
 
-//    public void moveBaseParkLeft(double driveSpeed, double turnSpeed, double baseDriveSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
-//        gyroStrafe(0.4, SPEED_INCR,-15.0 , 0);
-//        gyroHold(turnSpeed, 0, 1);
-//
-//
-//        gyroDrive(0.5, SPEED_INCR,-77, 0);
-//        gyroHold(turnSpeed, 0, 2);
-//
-//        gyroStrafe(0.4, SPEED_INCR,-17 / DRIFT_ADJUST, 0);
-//        gyroHold(turnSpeed, 0, 2);
-//
-//        baseGrabbers(true);
-//        gyroHold(turnSpeed, 0, 2);
-//
-//        gyroStrafe(baseDriveSpeed, .005,40, 0); //Increased speed when moving base to account for the "heaviness"
-//        baseGrabbers(false);
-//        gyroHold(turnSpeed, 0, 2);
-//
-//        gyroDrive(driveSpeed, SPEED_INCR, 45, 0);
-//        gyroHold(turnSpeed, 0, 2);
-//    }
+
+    public void moveBaseStartRight(double driveSpeed, double turnSpeed, double baseDriveSpeed, double baseTurnSpeed){ // increase baseDriveSpeed and baseTurnSpeed to account for the heaviness of the base
 
 
-    public void moveBaseStartLeft(double driveSpeed, double turnSpeed, double baseDriveSpeed, double baseTurnSpeed){ // increase baseDriveSpeed and baseTurnSpeed to account for the heaviness of the base
 
+        ElapsedTime timer = new ElapsedTime();
         // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
         // TO TURN LEFT MAKE THE ANGLE POSITIVE
 
-        gyroDrive(driveSpeed, SPEED_INCR,45 / DRIFT_ADJUST, 0);
+        gyroDrive(driveSpeed, SPEED_INCR, -48 / DRIFT_ADJUST, 0);
         gyroHold(turnSpeed, 0, 1);
 
-        gyroStrafe(baseDriveSpeed, SPEED_INCR, -10, 90);
+        gyroStrafe(driveSpeed, SPEED_INCR, -4 / DRIFT_ADJUST, 0);
         gyroHold(turnSpeed, 0, 1);
 
         baseGrabbers(true);
-        gyroHold(turnSpeed, 0, 1);
+        gyroHold(turnSpeed, 90, 1);
 
-        gyroTurn(baseTurnSpeed, 55);
-        gyroHold(turnSpeed, 55, 1);
+        gyroTurn(baseTurnSpeed, -45);
+        gyroHold(turnSpeed, -45, 1);
         gyroStrafe(baseDriveSpeed, .005,-40, 0); //Increased speed when moving base to account for the "heaviness"
 
-        gyroHold(turnSpeed, 55, 1);
+        gyroHold(turnSpeed, -45, 1);
 
 //        gyroTurn(baseTurnSpeed, 90);
 //        gyroHold(turnSpeed, 90, 1);
 
         baseGrabbers(false);
 
-        gyroDrive(driveSpeed, SPEED_INCR, -55, 45);
-        gyroHold(turnSpeed, 55, 1);
+        gyroDrive(driveSpeed, SPEED_INCR, 40, -50);
 
-        gyroTurn(turnSpeed, 0);
-        gyroStrafe(driveSpeed, SPEED_INCR, 6, 0);
+        gyroTurn(turnSpeed, -90);
+
+        gyroStrafe(driveSpeed, SPEED_INCR, 3, -90);
 
     }
 
