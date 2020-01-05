@@ -42,7 +42,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-@TeleOp(name="SQUISH", group="Iterative Opmode")
+@TeleOp(name="SQUISH-Heading", group="Iterative Opmode")
 public class HeadingDrive extends OpMode {
 
     /*
@@ -59,6 +59,8 @@ public class HeadingDrive extends OpMode {
     private DcMotor leftRear = null;    // yellow - port 1
     private DcMotor rightFront = null;  // green - port 3
     private DcMotor rightRear = null;   // blue - port 0
+
+    private boolean isStart = false;
 
     final double PI = 3.1415;
 
@@ -81,7 +83,7 @@ public class HeadingDrive extends OpMode {
          * Code to run ONCE when the driver hits INIT
          */
 
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
         parameters.loggingEnabled      = true;
@@ -126,6 +128,18 @@ public class HeadingDrive extends OpMode {
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        // Send telemetry message to alert driver that we are calibrating;
+        telemetry.addData(">", "Calibrating Gyro");    //
+        telemetry.update();
+
+        //gyro.calibrate();
+        gyro.initialize(parameters);
+        // make sure the gyro is calibrated before continuing
+        while (!isStart && gyro.isGyroCalibrated())  {
+            sleep(50);
+            idle();
+        }
+
         //Intake setup
 //        rightIntake.setDirection(DcMotor.Direction.FORWARD);
 //        leftIntake.setDirection(DcMotor.Direction.REVERSE);
@@ -153,19 +167,8 @@ public class HeadingDrive extends OpMode {
          * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
          */
 
-        // Send telemetry message to alert driver that we are calibrating;
-        telemetry.addData(">", "Calibrating Gyro");    //
-        telemetry.update();
-
-        //gyro.calibrate();
-        gyro.initialize(parameters);
-        // make sure the gyro is calibrated before continuing
-        while (gyro.isGyroCalibrated())  {
-            sleep(50);
-            idle();
-        }
-
-        telemetry.addData(">", "Robot Ready.");
+        telemetry.addLine("Waiting to start");
+        telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
         telemetry.update();
 
     }
@@ -177,6 +180,8 @@ public class HeadingDrive extends OpMode {
         /*
          * Code to run ONCE when the driver hits PLAY
          */
+
+        isStart = true;
 
     }
 
@@ -204,18 +209,19 @@ public class HeadingDrive extends OpMode {
         double turn   =  gamepad1.right_stick_x;
 
         velocityMag = Math.sqrt((driveX*driveX)+(driveY*driveY));
-        velocityAng = Math.atan(driveX/driveY);
+        velocityAng = findAngle(driveX, driveY) + getError(0);
 
-        telemetry.addData("Velocity", " magnitude = %f3.1 and angle = %f5.1", velocityMag, velocityAng*180/PI);
+        driveX = velocityMag * Math.cos(velocityAng);
+        driveY = velocityMag * Math.sin(velocityAng);
+
+        double leftFrontPower = Range.clip((driveX - driveY) + turn, -1.0, 1.0);
+        double rightFrontPower = Range.clip((driveX + driveY) - turn, -1.0, 1.0);
+        double leftRearPower = Range.clip((driveX + driveY) + turn, -1.0, 1.0);
+        double rightRearPower = Range.clip((driveX - driveY) - turn, -1.0, 1.0);
+
+        telemetry.addData("Velocity", " magnitude = %f and angle = %f", velocityMag, velocityAng*180/PI);
+        telemetry.addData("Speeds", " leftFront = %f and rightFront = %f", leftFrontPower, rightFrontPower);
         telemetry.update();
-
-        driveX = 0;
-        driveY = 0;
-
-        double leftFrontPower = Range.clip((driveY + driveX) + turn, -1.0, 1.0);
-        double leftRearPower = Range.clip((driveY - driveX) + turn, -1.0, 1.0);
-        double rightFrontPower = Range.clip((driveY - driveX) - turn, -1.0, 1.0);
-        double rightRearPower = Range.clip((driveY + driveX) - turn, -1.0, 1.0);
 
         leftFront.setPower(leftFrontPower / control);
         leftRear.setPower(leftRearPower / control);
@@ -236,6 +242,42 @@ public class HeadingDrive extends OpMode {
         rightFront.setPower(0);
         rightRear.setPower(0);
 
+    }
+
+    public double findAngle(double x, double y) {
+        double angle = Math.atan(x/y);
+
+        if (y <= 0) {
+            if (x < 0) {
+                angle -= PI;
+            }
+            else {
+                angle += PI;
+            }
+        }
+
+        if (x==0 && y==0){
+            angle = 0;
+        }
+
+        return -angle;
+    }
+
+    /**
+     * getError determines the error between the target angle and the robot's current heading
+     * @param   targetAngle  Desired angle (relative to global reference established at last Gyro Reset).
+     * @return  error angle: Degrees in the range +/- 180. Centered on the robot's frame of reference
+     *          +ve error means the robot should turn LEFT (CCW) to reduce error.
+     */
+    public double getError(double targetAngle) {
+
+        double robotError;
+
+        // calculate error in -179 to +180 range  (
+        robotError = targetAngle - gyro.getAngularOrientation().firstAngle;
+        while (robotError > PI)  robotError -= 2*PI;
+        while (robotError <= -PI) robotError += 2*PI;
+        return robotError;
     }
 
     public final void sleep(long milliseconds) {
