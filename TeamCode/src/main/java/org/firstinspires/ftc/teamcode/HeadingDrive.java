@@ -196,10 +196,10 @@ public class HeadingDrive extends OpMode {
         double desiredHeading;
         double velocityMag;
         double velocityAng;
-        double control = 2;
+        double control = 1.75;
 
         if (gamepad1.right_bumper) {
-            control = 4;
+            control = 3;
         } else if (gamepad1.left_bumper) {
             control = 1;
         }

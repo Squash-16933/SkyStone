@@ -47,15 +47,18 @@ public class ControlledDrive extends OpMode {
      * create DcMotors, controllers, and servos
      */
 
-    private DcMotor leftFront = null;   // white - port 2
-    private DcMotor leftRear = null;    // yellow - port 1
-    private DcMotor rightFront = null;  // green - port 3
-    private DcMotor rightRear = null;   // blue - port 0
+    final double PI = 3.1415;
+    final double speedIncr = 0.01;
 
-    private Servo rightTwist = null;
-    private Servo leftTwist = null;
+    private DcMotor leftFront = null;   // white  - Hub 2 port 2
+    private DcMotor leftRear = null;    // yellow - Hub 2 port 1
+    private DcMotor rightFront = null;  // green  - Hub 2 port 3
+    private DcMotor rightRear = null;   // blue   - Hub 2 port 0
 
-    private Servo rampServo = null;
+    private Servo rightTwist = null;    // Hub 2 - Port 0
+    private Servo leftTwist = null;     // Hub 2 - Port 1
+
+    private Servo rampServo = null;     // Hub 2 - Port 2
     private double rampPos = 0.4;
 
     private DcMotor rightIntake = null; // port 0
@@ -86,10 +89,10 @@ public class ControlledDrive extends OpMode {
         /*
          * Initialize motors, servos, and controllers with hardwareMap
          */
-        leftFront.setDirection(DcMotor.Direction.FORWARD);
-        leftRear.setDirection(DcMotor.Direction.FORWARD);
-        rightFront.setDirection(DcMotor.Direction.REVERSE);
-        rightRear.setDirection(DcMotor.Direction.REVERSE);
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        leftRear.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        rightRear.setDirection(DcMotor.Direction.FORWARD);
 
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -153,7 +156,11 @@ public class ControlledDrive extends OpMode {
          * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
          */
 
+        double velocityMag;
+        double velocityAng;
         double control = 2;
+        double setPowerTime;
+        double setPowerTimeMax = 0;
 
         if (gamepad1.right_bumper) {
             control = 4;
@@ -161,19 +168,38 @@ public class ControlledDrive extends OpMode {
             control = 1;
         }
 
-        double driveY = gamepad1.left_stick_y;
-        double driveX = -gamepad1.left_stick_x;
-        double turn = -gamepad1.right_stick_x;
+        double driveY = -gamepad1.left_stick_y;
+        double driveX =  gamepad1.left_stick_x;
+        double turn   =  gamepad1.right_stick_x;
 
-        double leftFrontPower = Range.clip((driveY + driveX) + turn, -1.0, 1.0);
-        double leftRearPower = Range.clip((driveY - driveX) + turn, -1.0, 1.0);
-        double rightFrontPower = Range.clip((driveY - driveX) - turn, -1.0, 1.0);
-        double rightRearPower = Range.clip((driveY + driveX) - turn, -1.0, 1.0);
+        velocityMag = Math.sqrt((driveX*driveX)+(driveY*driveY));
+        velocityAng = findAngle(driveX, driveY);
 
-        leftFront.setPower(leftFrontPower / control);
-        leftRear.setPower(leftRearPower / control);
-        rightFront.setPower(rightFrontPower / control);
-        rightRear.setPower(rightRearPower / control);
+        driveX = velocityMag * Math.cos(velocityAng);
+        driveY = velocityMag * Math.sin(velocityAng);
+
+        double leftFrontPower = Range.clip((driveX - driveY) + turn, -1.0, 1.0);
+        double rightFrontPower = Range.clip((driveX + driveY) - turn, -1.0, 1.0);
+        double leftRearPower = Range.clip((driveX + driveY) + turn, -1.0, 1.0);
+        double rightRearPower = Range.clip((driveX - driveY) - turn, -1.0, 1.0);
+
+        telemetry.addData("Velocity", " magnitude = %f and angle = %f", velocityMag, velocityAng*180/PI);
+        telemetry.addData("Speeds", " leftFront = %f, rightFront = %f, turn = %f", leftFrontPower, rightFrontPower, turn);
+
+        leftFrontPower /= control;
+        leftRearPower /= control;
+        rightFrontPower /= control;
+        rightRearPower /= control;
+
+        setPowerTime = getRuntime();
+        leftFront.setPower(leftFrontPower);
+        leftRear.setPower(leftRearPower);
+        rightFront.setPower(rightFrontPower);
+        rightRear.setPower(rightRearPower);
+        setPowerTime = getRuntime() - setPowerTime;
+        setPowerTimeMax = Math.max(setPowerTime, setPowerTimeMax);
+
+        telemetry.addData("Max setting power time = ", setPowerTimeMax);
 
         /*
          * Set controls on gamepads and update/set position of servos with delta variables
@@ -247,6 +273,26 @@ public class ControlledDrive extends OpMode {
             }
         }
     }
+
+    public double findAngle(double x, double y) {
+        double angle = Math.atan(x/y);
+
+        if (y <= 0) {
+            if (x < 0) {
+                angle -= PI;
+            }
+            else {
+                angle += PI;
+            }
+        }
+
+        if (x==0 && y==0){
+            angle = 0;
+        }
+
+        return -angle;
+    }
+
     @Override
     public void stop() {
 
