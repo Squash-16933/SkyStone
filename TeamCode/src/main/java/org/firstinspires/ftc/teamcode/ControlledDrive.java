@@ -67,6 +67,9 @@ public class ControlledDrive extends OpMode {
     private DigitalChannel stoneStop = null;
     private static final double RAMP_SERVO_INCREMENT = 0.001;
 
+    private double setPowerTimeMax = 0;
+
+
     @Override
     public void init() {
 
@@ -160,7 +163,6 @@ public class ControlledDrive extends OpMode {
         double velocityAng;
         double control = 2;
         double setPowerTime;
-        double setPowerTimeMax = 0;
 
         if (gamepad1.right_bumper) {
             control = 4;
