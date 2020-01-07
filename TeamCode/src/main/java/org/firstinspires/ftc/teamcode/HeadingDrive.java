@@ -62,8 +62,6 @@ public class HeadingDrive extends OpMode {
 
     private boolean isStart = false;
 
-    final double PI = 3.1415;
-
 //    private Servo rightTwist = null;
 //    private Servo leftTwist = null;
 //
@@ -100,15 +98,6 @@ public class HeadingDrive extends OpMode {
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
 
-//        rightTwist = hardwareMap.get(Servo.class, "rightTwist");
-//        leftTwist = hardwareMap.get(Servo.class, "leftTwist");
-//
-//        rampServo = hardwareMap.get(Servo.class, "rampServo");
-//        rampServo.setPosition(rampPos);
-//
-//        rightIntake = hardwareMap.get(DcMotor.class, "rightIntake");
-//        leftIntake = hardwareMap.get(DcMotor.class, "leftIntake");
-
         /*
          * Initialize motors, servos, and controllers with hardwareMap
          */
@@ -140,23 +129,6 @@ public class HeadingDrive extends OpMode {
             idle();
         }
 
-        //Intake setup
-//        rightIntake.setDirection(DcMotor.Direction.FORWARD);
-//        leftIntake.setDirection(DcMotor.Direction.REVERSE);
-
-
-//        rightIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        leftIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-//        rightIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        leftIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        // set twisters to up position
-//        rightTwist.setPosition(0);
-//        leftTwist.setPosition(1);
-
-        //Intake stopper
-//        stoneStop = hardwareMap.get(DigitalChannel.class, "stoneStop");
-//        stoneStop.setMode(DigitalChannel.Mode.INPUT);
     }
 
 
@@ -219,7 +191,7 @@ public class HeadingDrive extends OpMode {
         double leftRearPower = Range.clip((driveX + driveY) + turn, -1.0, 1.0);
         double rightRearPower = Range.clip((driveX - driveY) - turn, -1.0, 1.0);
 
-        telemetry.addData("Velocity", " magnitude = %f and angle = %f", velocityMag, velocityAng*180/PI);
+        telemetry.addData("Velocity", " magnitude = %f and angle = %f", velocityMag, velocityAng*180/Math.PI);
         telemetry.addData("Speeds", " leftFront = %f and rightFront = %f", leftFrontPower, rightFrontPower);
         telemetry.update();
 
@@ -249,10 +221,10 @@ public class HeadingDrive extends OpMode {
 
         if (y <= 0) {
             if (x < 0) {
-                angle -= PI;
+                angle -= Math.PI;
             }
             else {
-                angle += PI;
+                angle += Math.PI;
             }
         }
 
@@ -275,8 +247,8 @@ public class HeadingDrive extends OpMode {
 
         // calculate error in -179 to +180 range  (
         robotError = targetAngle - gyro.getAngularOrientation().firstAngle;
-        while (robotError > PI)  robotError -= 2*PI;
-        while (robotError <= -PI) robotError += 2*PI;
+        while (robotError > Math.PI)  robotError -= 2*Math.PI;
+        while (robotError <= -Math.PI) robotError += 2*Math.PI;
         return robotError;
     }
 

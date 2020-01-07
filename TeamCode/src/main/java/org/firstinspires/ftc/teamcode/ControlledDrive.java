@@ -47,7 +47,6 @@ public class ControlledDrive extends OpMode {
      * create DcMotors, controllers, and servos
      */
 
-    final double PI = 3.1415;
     final double speedIncr = 0.01;
 
     private DcMotor leftFront = null;   // white  - Hub 2 port 2
@@ -185,7 +184,7 @@ public class ControlledDrive extends OpMode {
         double leftRearPower = Range.clip((driveX + driveY) + turn, -1.0, 1.0);
         double rightRearPower = Range.clip((driveX - driveY) - turn, -1.0, 1.0);
 
-        telemetry.addData("Velocity", " magnitude = %f and angle = %f", velocityMag, velocityAng*180/PI);
+        telemetry.addData("Velocity", " magnitude = %f and angle = %f", velocityMag, velocityAng*180/Math.PI);
         telemetry.addData("Speeds", " leftFront = %f, rightFront = %f, turn = %f", leftFrontPower, rightFrontPower, turn);
 
         leftFrontPower /= control;
@@ -281,10 +280,10 @@ public class ControlledDrive extends OpMode {
 
         if (y <= 0) {
             if (x < 0) {
-                angle -= PI;
+                angle -= Math.PI;
             }
             else {
-                angle += PI;
+                angle += Math.PI;
             }
         }
 
