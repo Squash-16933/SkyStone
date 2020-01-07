@@ -87,8 +87,10 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
     private Servo rightTwist = null;
     private Servo leftTwist = null;
 
-    private Servo rampServo = null;
+    private Servo  rampServo = null;
     private double rampPos = 1;
+
+    private double loopTimeMax;
 
 
 
@@ -231,6 +233,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
         double  maxLeftFrontSpeed  = 0;
         double  maxRightFrontSpeed = 0;
         double  rampUpSpeed = speedIncr;
+        double  loopTime;
 
 
         // Ensure that the opmode is still active
@@ -288,6 +291,8 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                     (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy()) &&
                     (runtime.seconds() < 30)) {
 
+                loopTime = getRuntime();
+
                 // adjust relative speed based on heading error.
                 error = getError(headingAngle);
                 steer = getSteer(error, P_DRIVE_COEFF);
@@ -297,7 +302,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
                     steer *= -1.0;
                 }
 
-                velocityAng = (driveAngle + getError(headingAngle))*Math.PI/180;
+                velocityAng = (driveAngle + error)*Math.PI/180;
 
                 driveX = speed * Math.cos(velocityAng);
                 driveY = speed * Math.sin(velocityAng);
@@ -312,7 +317,6 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
                 telemetry.addData("Angle error: ", error);
                 telemetry.addData("Max speeds: ", "Left Front = %f, Right Front = %f", maxLeftFrontSpeed, maxRightFrontSpeed);
-                telemetry.update();
 
                 // Normalize speeds if either one exceeds +/- 1.0;
                 maxF = Math.max(Math.abs(leftFrontSpeed), Math.abs(rightFrontSpeed));
@@ -328,10 +332,16 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
                 // The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
                 //   as these are the wheels that cause the robot to drift to the right.
-                leftFront.setPower(leftFrontSpeed*DRIFT_ADJUST);
+                leftFront.setPower(leftFrontSpeed);
                 leftRear.setPower(leftRearSpeed);
                 rightFront.setPower(rightFrontSpeed);
-                rightRear.setPower(rightRearSpeed*DRIFT_ADJUST);
+                rightRear.setPower(rightRearSpeed);
+
+                loopTime = getRuntime() - loopTime;
+                loopTimeMax = Math.max(loopTime, loopTimeMax);
+
+                telemetry.addData("Max loop time = ", loopTimeMax);
+                telemetry.update();
 
             }
 
