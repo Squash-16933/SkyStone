@@ -73,7 +73,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
     static final double     HEADING_THRESHOLD       = 0.5 ;      // As tight as we can make it with an integer gyro
     static final double     P_TURN_COEFF            = 0.05;     // Larger is more responsive, but also less stable
-    static final double     P_DRIVE_COEFF           = 0.075;     // Larger is more responsive, but also less stable
+    static final double     P_DRIVE_COEFF           = 0.03;     // Larger is more responsive, but also less stable
     static final double     DRIFT_ADJUST            = 1.0;      // This constant will be used to adjust the speed for
                                                                 //  the leftFront and rightRear motors
     static final double     SPEED_INCR              = 0.01;     // This constant is used to ramp-up the speed of the motors
@@ -615,7 +615,7 @@ public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
      * @return
      */
     public double getSteer(double error, double PCoeff) {
-        return Range.clip(Math.signum(error) * Math.abs(Math.log(Math.abs(error))) * PCoeff, -1, 1);
+        return Range.clip(error * PCoeff, -1, 1);
     }
 
     public void moveBaseParkLeft(double driveSpeed, double turnSpeed, double baseDriveSpeed){ // RENAME THIS METHOD TO SOMETHING BETTER LATER ----- will move base to correct location then go and park
