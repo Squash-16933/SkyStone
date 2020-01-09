@@ -184,7 +184,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-        moveBaseParkLeft(DRIVE_SPEED, TURN_SPEED, 0.9);
+        moveBaseStartLeft(TURN_SPEED, DRIVE_SPEED,0.9, 0.9);
 
         // Commented these out as they would slow down the code.  To be used for debugging only
 //        telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
@@ -639,6 +639,36 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         gyroHold(turnSpeed, 0, 2);
     }
 
+    public void moveBaseStartLeft(double driveSpeed, double turnSpeed, double baseDriveSpeed, double baseTurnSpeed){ // increase baseDriveSpeed and baseTurnSpeed to account for the heaviness of the base
+
+        // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
+        // TO TURN LEFT MAKE THE ANGLE POSITIVE
+
+        gyroDrive(driveSpeed, SPEED_INCR,48, 0, 0);
+        gyroHold(turnSpeed, 0, 1);
+
+        gyroDrive(baseDriveSpeed, SPEED_INCR, 10, 0,90);
+        gyroHold(turnSpeed, 0, 1);
+
+        baseGrabbers(true);
+        gyroHold(turnSpeed, 0, 1);
+
+        gyroTurn(baseTurnSpeed, 65);
+        gyroHold(turnSpeed, 65, 1);
+        gyroDrive(baseDriveSpeed, SPEED_INCR,40, 65, 90); //Increased speed when moving base to account for the "heaviness"
+
+        gyroTurn(turnSpeed, 45);
+        gyroHold(turnSpeed, 45, 1);
+
+        baseGrabbers(false);
+
+        gyroDrive(driveSpeed, SPEED_INCR, 55, 45, 180);
+        gyroHold(turnSpeed, 45, 1);
+
+        gyroTurn(turnSpeed, 0);
+        gyroDrive(driveSpeed, SPEED_INCR, 12, 0, 180);
+
+    }
 
     public void parkLeft(double driveSpeed, double turnSpeed){  //Will strafe left until under bridge when placed on RIGHT SIDE OF BLUE or RIGHT SIDE OF RED
         gyroDrive(driveSpeed, SPEED_INCR,-20, 0, 0);
