@@ -74,7 +74,6 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
     static final double     P_TURN_COEFF            = 0.03;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.01;     // Larger is more responsive, but also less stable
-    static final double     DRIFT_ADJUST            = 0.72;      // This constant will be used to adjust the speed for
     //  the leftFront and rightRear motors
     static final double     SPEED_INCR              = 0.01;     // This constant is used to ramp-up the speed of the motors
 
@@ -135,6 +134,11 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // Send telemetry message to alert driver that we are calibrating;
         telemetry.addData(">", "Calibrating Gyro");    //
         telemetry.update();
@@ -178,7 +182,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-        moveBaseStartLeft(0.5, 0.3, 0.9, 0.7);
+        moveBaseStartLeft(0.7, 0.5, 0.9, 0.7);
 
 
     }
@@ -224,16 +228,16 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
             leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
+            
 
             // Determine new target position, and pass to motor controller
             //  The target positions for the leftFront and rightRear wheels are adjust by the
-            //  DRIFT_ADJUST (< 1) as these are the wheels that cause the robot to drift to the right
+            //   (< 1) as these are the wheels that cause the robot to drift to the right
             moveCounts = (int)(distance * COUNTS_PER_INCH/Math.cos(WHEEL_ANGLE)/2);
-            newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(moveCounts * DRIFT_ADJUST);
+            newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(moveCounts);
             newLeftRearTarget = leftRear.getCurrentPosition() + moveCounts;
             newRightFrontTarget = rightFront.getCurrentPosition() + moveCounts;
-            newRightRearTarget = rightRear.getCurrentPosition() + (int)(moveCounts * DRIFT_ADJUST);
+            newRightRearTarget = rightRear.getCurrentPosition() + (int)(moveCounts);
 
 
             // Set Target and Turn On RUN_TO_POSITION
@@ -248,16 +252,15 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
             rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // start motion
-            //   The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
+            //   The speed for the leftFront and rightRear wheels are adjusted by  (< 1)
             //   as these are the wheels that cause the robot to drift to the right.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
+            speed = Range.clip(Math.abs(speed /Math.cos(WHEEL_ANGLE)/2), 0.0, 1.0);            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
             //   suddenly causes the wheels to slip which in turn mess up the distance traveled.
             while (rampUpSpeed < speed) {
-                leftFront.setPower(rampUpSpeed * DRIFT_ADJUST);
+                leftFront.setPower(rampUpSpeed);
                 leftRear.setPower(rampUpSpeed);
                 rightFront.setPower(rampUpSpeed);
-                rightRear.setPower(rampUpSpeed * DRIFT_ADJUST);
+                rightRear.setPower(rampUpSpeed);
                 rampUpSpeed += SPEED_INCR;
             }
 
@@ -290,12 +293,12 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
                 leftRearSpeed = leftFrontSpeed;
                 rightRearSpeed = rightFrontSpeed;
 
-                // The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
+                // The speed for the leftFront and rightRear wheels are adjusted by  (< 1)
                 //   as these are the wheels that cause the robot to drift to the right.
-                leftFront.setPower(leftFrontSpeed*DRIFT_ADJUST);
+                leftFront.setPower(leftFrontSpeed);
                 leftRear.setPower(leftRearSpeed);
                 rightFront.setPower(rightFrontSpeed);
-                rightRear.setPower(rightRearSpeed*DRIFT_ADJUST);
+                rightRear.setPower(rightRearSpeed);
 
             }
 
@@ -346,12 +349,12 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
 
             // Determine new target position, and pass to motor controller
             //  The target positions for the leftFront and rightRear wheels are adjust by the
-            //  DRIFT_ADJUST (< 1) as these are the wheels that cause the robot to drift to the right
+            //   (< 1) as these are the wheels that cause the robot to drift to the right
             moveCounts = (int)(distance * COUNTS_PER_INCH/Math.cos(WHEEL_ANGLE)/2);
-            newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(moveCounts * DRIFT_ADJUST);
+            newLeftFrontTarget = leftFront.getCurrentPosition() + (int)(moveCounts);
             newLeftRearTarget = leftRear.getCurrentPosition() + moveCounts;
             newRightFrontTarget = rightFront.getCurrentPosition() + moveCounts;
-            newRightRearTarget = rightRear.getCurrentPosition() + (int)(moveCounts * DRIFT_ADJUST);
+            newRightRearTarget = rightRear.getCurrentPosition() + (int)(moveCounts);
 
 
             // Set Target and Turn On RUN_TO_POSITION
@@ -366,16 +369,15 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
             rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
             // start motion.
-            //   The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
+            //   The speed for the leftFront and rightRear wheels are adjusted by  (< 1)
             //   as these are the wheels that cause the robot to drift to the right.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
+            speed = Range.clip(Math.abs(speed /Math.cos(WHEEL_ANGLE)/2), 0.0, 1.0);            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
             //   suddenly causes the wheels to slip which in turn mess up the distance traveled.
             while (rampUpSpeed < speed) {
-                leftFront.setPower(rampUpSpeed * DRIFT_ADJUST);
+                leftFront.setPower(rampUpSpeed);
                 leftRear.setPower(rampUpSpeed);
                 rightFront.setPower(rampUpSpeed);
-                rightRear.setPower(rampUpSpeed * DRIFT_ADJUST);
+                rightRear.setPower(rampUpSpeed);
                 rampUpSpeed += SPEED_INCR;
             }
 
@@ -407,10 +409,10 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
                 leftFrontSpeed = rightFrontSpeed;
                 leftRearSpeed = rightRearSpeed;
 
-                leftFront.setPower(leftFrontSpeed * DRIFT_ADJUST);
+                leftFront.setPower(leftFrontSpeed);
                 leftRear.setPower(-leftRearSpeed);
                 rightFront.setPower(-rightFrontSpeed);
-                rightRear.setPower(rightRearSpeed * DRIFT_ADJUST);
+                rightRear.setPower(rightRearSpeed);
 
             }
 
@@ -574,7 +576,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
 //        gyroDrive(0.5, SPEED_INCR,-77, 0);
 //        gyroHold(turnSpeed, 0, 2);
 //
-//        gyroStrafe(0.4, SPEED_INCR,-17 / DRIFT_ADJUST, 0);
+//        gyroStrafe(0.4, SPEED_INCR,-17 / , 0);
 //        gyroHold(turnSpeed, 0, 2);
 //
 //        baseGrabbers(true);
@@ -594,31 +596,32 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
         // TO TURN LEFT MAKE THE ANGLE POSITIVE
 
-        gyroDrive(driveSpeed, SPEED_INCR,45 / DRIFT_ADJUST, 0);
+        gyroDrive(driveSpeed, SPEED_INCR,48, 0);
         gyroHold(turnSpeed, 0, 1);
 
-        gyroStrafe(baseDriveSpeed, SPEED_INCR, -10, 90);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR, -7, 90);
         gyroHold(turnSpeed, 0, 1);
 
         baseGrabbers(true);
         gyroHold(turnSpeed, 0, 1);
 
-        gyroTurn(baseTurnSpeed, 55);
-        gyroHold(turnSpeed, 55, 1);
-        gyroStrafe(baseDriveSpeed, .005,-40, 0); //Increased speed when moving base to account for the "heaviness"
+        gyroTurn(baseTurnSpeed, 65);
+        gyroHold(turnSpeed, 65, 1);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR,-50, 65); //Increased speed when moving base to account for the "heaviness"
 
-        gyroHold(turnSpeed, 55, 1);
+        gyroHold(turnSpeed, 45, 1);
 
 //        gyroTurn(baseTurnSpeed, 90);
 //        gyroHold(turnSpeed, 90, 1);
 
         baseGrabbers(false);
 
-        gyroDrive(driveSpeed, SPEED_INCR, -55, 45);
-        gyroHold(turnSpeed, 55, 1);
+        gyroDrive(driveSpeed, SPEED_INCR, -50, 45);
+        gyroHold(turnSpeed, 45, 1);
 
         gyroTurn(turnSpeed, 0);
-        gyroStrafe(driveSpeed, SPEED_INCR, 6, 0);
+
+        gyroDrive(driveSpeed, SPEED_INCR, -10, 0);
 
     }
 

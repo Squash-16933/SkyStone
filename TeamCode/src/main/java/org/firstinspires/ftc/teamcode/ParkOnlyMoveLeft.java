@@ -238,8 +238,7 @@ public class ParkOnlyMoveLeft extends LinearOpMode {
             // start motion
             //   The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
             //   as these are the wheels that cause the robot to drift to the right.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
+            speed = Range.clip(Math.abs(DRIVE_SPEED /Math.cos(WHEEL_ANGLE)/2), 0.0, 1.0);            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
             //   suddenly causes the wheels to slip which in turn mess up the distance traveled.
             while (rampUpSpeed < speed) {
                 leftFront.setPower(rampUpSpeed * DRIFT_ADJUST);
@@ -331,6 +330,11 @@ public class ParkOnlyMoveLeft extends LinearOpMode {
             rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+            leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
             // Determine new target position, and pass to motor controller
             //  The target positions for the leftFront and rightRear wheels are adjust by the
@@ -356,8 +360,7 @@ public class ParkOnlyMoveLeft extends LinearOpMode {
             // start motion.
             //   The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
             //   as these are the wheels that cause the robot to drift to the right.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
+            speed = Range.clip(Math.abs(DRIVE_SPEED /Math.cos(WHEEL_ANGLE)/2), 0.0, 1.0);            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
             //   suddenly causes the wheels to slip which in turn mess up the distance traveled.
             while (rampUpSpeed < speed) {
                 leftFront.setPower(rampUpSpeed * DRIFT_ADJUST);

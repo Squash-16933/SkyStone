@@ -47,6 +47,7 @@ import java.sql.Driver;
 
 
 @Autonomous(name="Park Base Starting Right Blue", group="Linear OpMode")
+@Disabled
 
 public class MoveBaseStartRightBlue extends LinearOpMode {
 
@@ -61,7 +62,7 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
 
     static final double     COUNTS_PER_MOTOR_REV    = 537.6 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP CHANGE ME IF CRAP GETS WILD
-    static final double     WHEEL_DIAMETER_INCHES   = 3.5;     // For figuring circumference
+    static final double     WHEEL_DIAMETER_INCHES   = 3.45;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     WHEEL_ANGLE             = Math.PI/4;
@@ -74,7 +75,7 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
     static final double     P_TURN_COEFF            = 0.03;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.02;     // Larger is more responsive, but also less stable
-    static final double     DRIFT_ADJUST            = 0.75;      // This constant will be used to adjust the speed for
+    static final double     DRIFT_ADJUST            = 1;      // This constant will be used to adjust the speed for
     //  the leftFront and rightRear motors
     static final double     SPEED_INCR              = 0.01;     // This constant is used to ramp-up the speed of the motors
 
@@ -135,6 +136,11 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
         rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // Send telemetry message to alert driver that we are calibrating;
         telemetry.addData(">", "Calibrating Gyro");    //
         telemetry.update();
@@ -178,7 +184,7 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
         telemetry.addLine("Moving forward");
         telemetry.update();
 
-        moveBaseStartRight(0.7, 0.3, 0.9, 0.7);
+        moveBaseStartRight(0.7, 0.5, 0.9, 0.7);
 
 
         // Commented these out as they would slow down the code.  To be used for debugging only
@@ -229,6 +235,11 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
             rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+            leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
             // Determine new target position, and pass to motor controller
             //  The target positions for the leftFront and rightRear wheels are adjust by the
@@ -254,8 +265,7 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
             // start motion
             //   The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
             //   as these are the wheels that cause the robot to drift to the right.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
-            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
+            speed = Range.clip(Math.abs(speed/Math.cos(WHEEL_ANGLE)/2), 0.0, 1.0);            // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
             //   suddenly causes the wheels to slip which in turn mess up the distance traveled.
             while (rampUpSpeed < speed) {
                 leftFront.setPower(rampUpSpeed * DRIFT_ADJUST);
@@ -347,6 +357,10 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
             rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+            leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             // Determine new target position, and pass to motor controller
             //  The target positions for the leftFront and rightRear wheels are adjust by the
@@ -372,7 +386,7 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
             // start motion.
             //   The speed for the leftFront and rightRear wheels are adjusted by DRIFT_ADJUST (< 1)
             //   as these are the wheels that cause the robot to drift to the right.
-            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            speed = Range.clip(Math.abs(speed /Math.cos(WHEEL_ANGLE)/2), 0.0, 1.0);
             // This while loop ensures that the motor speeds are ramped up slowly.  Setting the speeds
             //   suddenly causes the wheels to slip which in turn mess up the distance traveled.
             while (rampUpSpeed < speed) {
@@ -577,11 +591,11 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
         // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
         // TO TURN LEFT MAKE THE ANGLE POSITIVE
 
-        gyroStrafe(driveSpeed, SPEED_INCR,-15.0 / DRIFT_ADJUST, 0);
+        gyroStrafe(driveSpeed, SPEED_INCR,-15.0, 0);
         gyroHold(turnSpeed, 0, 1);
 
 
-        gyroDrive(driveSpeed, SPEED_INCR,-42 / DRIFT_ADJUST, 0);
+        gyroDrive(driveSpeed, SPEED_INCR,-44, 0);
         gyroHold(turnSpeed, 0, 1);
 
         while(getRuntime() == 1000){
@@ -594,31 +608,32 @@ public class MoveBaseStartRightBlue extends LinearOpMode {
 //        gyroTurn(turnSpeed, 90);
         gyroHold(turnSpeed, 90, 1);
 
-        gyroDrive(driveSpeed, SPEED_INCR,30, 0);
+        gyroDrive(driveSpeed, SPEED_INCR,35, 0);
         gyroHold(turnSpeed, 90, 1);
 
-        gyroStrafe(baseDriveSpeed, SPEED_INCR, -10, 90);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR, -6, 90);
         gyroHold(turnSpeed, 90, 1);
 
         baseGrabbers(true);
-        gyroHold(turnSpeed, 90, 1);
+        gyroHold(turnSpeed, 0, 1);
 
-        gyroTurn(baseTurnSpeed, 140);
-        gyroHold(turnSpeed, 140, 1);
-        gyroStrafe(baseDriveSpeed, .005,-40, 0); //Increased speed when moving base to account for the "heaviness"
+        gyroTurn(baseTurnSpeed, 65);
+        gyroHold(turnSpeed, 65, 1);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR,-50, 65); //Increased speed when moving base to account for the "heaviness"
 
-        gyroHold(turnSpeed, 140, 1);
+        gyroHold(turnSpeed, 45, 1);
 
 //        gyroTurn(baseTurnSpeed, 90);
 //        gyroHold(turnSpeed, 90, 1);
 
         baseGrabbers(false);
 
-        gyroDrive(driveSpeed, SPEED_INCR, -40, 150);
+        gyroDrive(driveSpeed, SPEED_INCR, -50, 45);
+        gyroHold(turnSpeed, 45, 1);
 
-        gyroTurn(turnSpeed, 90);
+        gyroTurn(turnSpeed, 0);
 
-        gyroDrive(driveSpeed, SPEED_INCR, -3, 90);
+        gyroDrive(driveSpeed, SPEED_INCR, -10, 0);
 
     }
 
