@@ -285,7 +285,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
 
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
-                    (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy()) &&
+                    (leftFront.isBusy() || leftRear.isBusy() || rightFront.isBusy() || rightRear.isBusy()) &&
                     (runtime.seconds() < 30)) {
 
                 loopTime = getRuntime();
