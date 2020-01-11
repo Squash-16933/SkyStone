@@ -267,7 +267,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
 
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
-                    (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy()) &&
+                    (leftFront.isBusy() || leftRear.isBusy() || rightFront.isBusy() || rightRear.isBusy()) ||
                     (runtime.seconds() < 30)) {
 
                 // adjust relative speed based on heading error.
@@ -278,6 +278,8 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
                 if (distance < 0) {
                     steer *= -1.0;
                 }
+
+//                steer = 0;
 
                 leftFrontSpeed = speed - steer;
                 rightFrontSpeed = speed + steer;
@@ -300,6 +302,13 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
                 rightFront.setPower(rightFrontSpeed);
                 rightRear.setPower(rightRearSpeed);
 
+//                telemetry.addData("Motor counts:", "Desired count = %d, RF = %d, LF = %d, RR = %d, LR = %d",
+//                        moveCounts ,rightFront.getCurrentPosition(), leftFront.getCurrentPosition(),
+//                        rightRear.getCurrentPosition(), leftRear.getCurrentPosition());
+//                telemetry.addData("Motor speeds:", "Desired speed = %4.2f, RF = %4.2f, LF = %4.2f, RR = %4.2f, LR = %4.2f",
+//                        speed ,rightFront.getPower(), leftFront.getPower(),
+//                        rightRear.getPower(), leftRear.getPower());
+//                telemetry.update();
             }
 
             // Stop all motion;
@@ -384,7 +393,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
 
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
-                    (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy())) {
+                    (leftFront.isBusy() || leftRear.isBusy() || rightFront.isBusy() || rightRear.isBusy())) {
 
                 // adjust relative speed based on heading error.
                 error = getError(angle);
