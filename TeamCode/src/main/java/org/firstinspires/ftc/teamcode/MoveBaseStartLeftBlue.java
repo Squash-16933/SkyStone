@@ -599,7 +599,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         gyroDrive(driveSpeed, SPEED_INCR,48, 0);
         gyroHold(turnSpeed, 0, 1);
 
-        gyroStrafe(baseDriveSpeed, SPEED_INCR, -7, 90);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR, -7, 0);
         gyroHold(turnSpeed, 0, 1);
 
         baseGrabbers(true);
