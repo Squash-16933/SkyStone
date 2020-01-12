@@ -593,7 +593,7 @@ public class MoveBaseStartRightRed extends LinearOpMode {
         gyroHold(turnSpeed, 0, 1);
 
         gyroTurn( 0.5, 180);
-        gyroHold(turnSpeed,-179, 1);
+        gyroHold(turnSpeed,180, 1);
 
         gyroDrive(driveSpeed, SPEED_INCR, -43, 180);
         gyroHold(turnSpeed, 180, 1);
