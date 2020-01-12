@@ -29,6 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.drawable.GradientDrawable;
+
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -39,6 +43,9 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
 @TeleOp(name="SQUISH", group="Iterative Opmode")
 public class ControlledDrive extends OpMode {
 
@@ -46,6 +53,13 @@ public class ControlledDrive extends OpMode {
      * Create position and delta variables inside TeleOp class
      * create DcMotors, controllers, and servos
      */
+
+    private BNO055IMU gyro;
+    private Orientation angles;
+    private Acceleration gravity;
+    BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+    private boolean isStart = false;
 
     private DcMotor leftFront = null;   // white - port 2
     private DcMotor leftRear = null;    // yellow - port 1
@@ -61,12 +75,31 @@ public class ControlledDrive extends OpMode {
     private DcMotor rightIntake = null; // port 0
     private DcMotor leftIntake = null; // port 1
 
+    private double velocityLeftX;
+    private double velocityLeftY;
+
+    private double velocityRightX;
+    private double velocityRightY;
+
+    private double robotVelocity;
+    private double robotAngleError;
+
+    private double phi;
+
     private DigitalChannel stoneStop = null;
     private static final double RAMP_SERVO_INCREMENT = 0.001;
 
     @Override
     public void init() {
 
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        gyro = hardwareMap.get(BNO055IMU.class, "gyro");
         /*
          * Code to run ONCE when the driver hits INIT
          */
@@ -119,19 +152,26 @@ public class ControlledDrive extends OpMode {
         //Intake stopper
         stoneStop = hardwareMap.get(DigitalChannel.class, "stoneStop");
         stoneStop.setMode(DigitalChannel.Mode.INPUT);
+
+        telemetry.addData(">", "Calibrating Gyro");    //
+        telemetry.update();
+
+        gyro.initialize(parameters);
+
+
+        while (!isStart && gyro.isGyroCalibrated())  {
+            sleep(50);
+            idle();
+        }
     }
 
 
     @Override
     public void init_loop() {
 
-        /*
-         * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
-         */
-
-        /*
-         * Set initial servo positions
-         */
+       telemetry.addLine("Waiting to start");
+       telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
+       telemetry.update();
 
     }
 
@@ -164,6 +204,12 @@ public class ControlledDrive extends OpMode {
         double driveY = gamepad1.left_stick_y;
         double driveX = -gamepad1.left_stick_x;
         double turn = -gamepad1.right_stick_x;
+
+        robotVelocity = Math.sqrt((driveX * driveX) + (driveY + driveY));
+
+        driveX = leftVelocity((robotVelocity));
+        driveY = rightVelocity(robotVelocity);
+
 
         double leftFrontPower = Range.clip((driveY + driveX) + turn, -1.0, 1.0);
         double leftRearPower = Range.clip((driveY - driveX) + turn, -1.0, 1.0);
@@ -248,6 +294,38 @@ public class ControlledDrive extends OpMode {
             }
         }
     }
+
+    public double leftVelocity(double robotVelocity){
+        double alpha = ((getPhi() + getError(0)) * Math.PI) / 8;
+        return ( robotVelocity * (Math.sin(alpha) + Math.cos(alpha)) )/ Math.sqrt(2);
+    }
+
+    public double rightVelocity(double robotVelocity){
+        double alpha = ((getPhi() + getError(0)) * Math.PI) / 8;
+        return (robotVelocity * ( Math.cos(alpha) - Math.sin(alpha)) ) / Math.sqrt(2);
+    }
+
+    public double getPhi(){
+        double  x = -gamepad1.left_stick_x;
+        double  y = gamepad1.left_stick_y;
+        double angle  = Math.atan(x/y);
+
+        if(y <= 0){
+            if(x < 0){
+                angle -= Math.PI;
+            }
+            else{
+                angle += Math.PI;
+            }
+
+            if(x == 0 && y == 0){
+                angle = 0;
+            }
+        }
+        return -angle;
+    }
+
+
     @Override
     public void stop() {
 
@@ -268,6 +346,28 @@ public class ControlledDrive extends OpMode {
          * Stop all motion
          */
 
+    }
+
+    public double getError(double targetAngle) {
+
+        double robotError;
+
+        // calculate error in -179 to +180 range  (
+        robotError = targetAngle - gyro.getAngularOrientation().firstAngle;
+        while (robotError > 180)  robotError -= 360;
+        while (robotError <= -180) robotError += 360;
+        return robotError;
+    }
+
+    public final void sleep(long milliseconds){
+        try{
+            Thread.sleep(milliseconds);
+        }   catch(InterruptedException e){
+            Thread.currentThread().interrupt();
+        }
+    }
+    public final void idle(){
+        Thread.yield();
     }
 
 }
