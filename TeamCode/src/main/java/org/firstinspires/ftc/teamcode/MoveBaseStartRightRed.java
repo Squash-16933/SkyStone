@@ -589,33 +589,38 @@ public class MoveBaseStartRightRed extends LinearOpMode {
 
         // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
         // TO TURN LEFT MAKE THE ANGLE POSITIVE
-
-        gyroDrive(driveSpeed, SPEED_INCR, -48, 0);
+        gyroDrive(driveSpeed, SPEED_INCR, 5, 0);
         gyroHold(turnSpeed, 0, 1);
 
-        gyroStrafe(driveSpeed, SPEED_INCR, -6, 0);
-        gyroHold(turnSpeed, 0, 1);
+        gyroTurn( 0.5, 180);
+        gyroHold(turnSpeed,-179, 1);
+
+        gyroDrive(driveSpeed, SPEED_INCR, -43, 180);
+        gyroHold(turnSpeed, 180, 1);
+
+        gyroStrafe(driveSpeed, SPEED_INCR, -7, 180);
+        gyroHold(turnSpeed, 180, 1);
 
         baseGrabbers(true);
-        gyroHold(turnSpeed, 0, 1);
+        gyroHold(turnSpeed, 180, 1);
 
-        gyroTurn(baseTurnSpeed, -65);
-        gyroHold(turnSpeed, -65, 1);
-        gyroStrafe(baseDriveSpeed, SPEED_INCR,-50, -65); //Increased speed when moving base to account for the "heaviness"
+        gyroTurn(baseTurnSpeed, 135);
+        gyroHold(turnSpeed, 135, 1);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR,-50, 135); //Increased speed when moving base to account for the "heaviness"
 
-        gyroHold(turnSpeed, -45, 1);
+        gyroHold(turnSpeed, 135, 1);
 
         baseGrabbers(false);
 
-        gyroTurn(turnSpeed, -45);
-        gyroHold(turnSpeed, -45, 1);
+//        gyroTurn(turnSpeed, -115);
+//        gyroHold(turnSpeed, -45, 1);
 
-        gyroDrive(driveSpeed, SPEED_INCR, 40, -45);
-        gyroHold(turnSpeed, -45, 1);
-
-        gyroTurn(turnSpeed, 180);
-
-        gyroStrafe(driveSpeed, SPEED_INCR, 3, 180);
+        gyroDrive(driveSpeed, SPEED_INCR, 70, 135);
+//        gyroHold(turnSpeed, -45, 1);
+//
+//        gyroTurn(turnSpeed, 180);
+//
+//        gyroStrafe(driveSpeed, SPEED_INCR, 3, 180);
 
     }
 

@@ -267,8 +267,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
 
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
-                    (leftFront.isBusy() || leftRear.isBusy() || rightFront.isBusy() || rightRear.isBusy()) ||
-                    (runtime.seconds() < 30)) {
+                    (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy())) {
 
                 // adjust relative speed based on heading error.
                 error = getError(angle);
@@ -393,7 +392,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
 
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
-                    (leftFront.isBusy() || leftRear.isBusy() || rightFront.isBusy() || rightRear.isBusy())) {
+                    (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy())) {
 
                 // adjust relative speed based on heading error.
                 error = getError(angle);
@@ -456,7 +455,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
             // Update telemetry & Allow time for other processes to run.
             telemetry.addData(">", gyro.getAngularOrientation().firstAngle);
-            telemetry.update();
+//            telemetry.update();
             telemetry.update();
         }
     }
@@ -608,7 +607,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         gyroDrive(driveSpeed, SPEED_INCR,48, 0);
         gyroHold(turnSpeed, 0, 1);
 
-        gyroStrafe(baseDriveSpeed, SPEED_INCR, -7, 90);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR, -7, 0);
         gyroHold(turnSpeed, 0, 1);
 
         baseGrabbers(true);
@@ -626,11 +625,11 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         baseGrabbers(false);
 
         gyroDrive(driveSpeed, SPEED_INCR, -50, 45);
-        gyroHold(turnSpeed, 45, 1);
+//        gyroHold(turnSpeed, 45, 1);
 
-        gyroTurn(turnSpeed, 0);
-
-        gyroDrive(driveSpeed, SPEED_INCR, -10, 0);
+//        gyroTurn(turnSpeed, 0);
+//
+//        gyroDrive(driveSpeed, SPEED_INCR, -10, 0);
 
     }
 
