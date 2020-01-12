@@ -279,8 +279,7 @@ public class MoveBaseStartRightRed extends LinearOpMode {
 
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
-                    (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy()) &&
-                    (runtime.seconds() < 30)) {
+                    (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy())) {
 
                 // adjust relative speed based on heading error.
                 error = getError(angle);
@@ -615,11 +614,11 @@ public class MoveBaseStartRightRed extends LinearOpMode {
 //        gyroTurn(turnSpeed, -115);
 //        gyroHold(turnSpeed, -45, 1);
 
-        gyroDrive(driveSpeed, SPEED_INCR, 70, 135);
-//        gyroHold(turnSpeed, -45, 1);
+        gyroDrive(driveSpeed, SPEED_INCR, 50, 135);
+
 //
-//        gyroTurn(turnSpeed, 180);
-//
+        gyroTurn(turnSpeed, 0);
+        gyroDrive(driveSpeed, SPEED_INCR, -5, 0);
 //        gyroStrafe(driveSpeed, SPEED_INCR, 3, 180);
 
     }
