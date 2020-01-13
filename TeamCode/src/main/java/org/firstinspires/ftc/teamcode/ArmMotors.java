@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -40,11 +41,11 @@ import com.qualcomm.robotcore.util.Range;
 public class ArmMotors extends OpMode {
     private DcMotor fastMotor = null;
     private DcMotor slowMotor = null;
-    final static double fastMotorTPR = 537.6;
-    final static double slowMotorTPR = 383.6;
-    final static double fastMotorRPM = 312.0;
-    final static double slowMotorRPM = 435.0;
-    final static double fastMotorSpeed = slowMotorRPM / fastMotorRPM;
+    final static double FAST_MOTOR_TPR = 537.6;
+    final static double SLOW_MOTOR_TPR = 383.6;
+    final static double FAST_MOTOR_RPM = 312.0;
+    final static double SLOW_MOTOR_RPM = 435.0;
+    final static double fastMotorSpeed = SLOW_MOTOR_RPM / FAST_MOTOR_RPM;
     /*
      * Create position and delta variables inside TeleOp class
      * create DcMotors, controllers, and servos
@@ -52,12 +53,15 @@ public class ArmMotors extends OpMode {
 
     @Override
     public void init() {
-        fastMotor = hardwareMap.get(DcMotor.class, "fastMotor");
-        slowMotor = hardwareMap.get(DcMotor.class, "slowMotor");
         /*
          * Code to run ONCE when the driver hits INIT
          */
 
+        fastMotor = hardwareMap.get(DcMotor.class, "fastMotor");
+        slowMotor = hardwareMap.get(DcMotor.class, "slowMotor");
+
+        fastMotor.setDirection(DcMotor.Direction.REVERSE);
+        slowMotor.setDirection(DcMotor.Direction.FORWARD);
     }
 
 
