@@ -29,16 +29,11 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.drawable.GradientDrawable;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -205,7 +200,7 @@ public class ControlledDrive extends OpMode {
         double driveX = -gamepad1.left_stick_x;
         double turn = -gamepad1.right_stick_x;
 
-        robotVelocity = Math.sqrt((driveX * driveX) + (driveY + driveY));
+        robotVelocity = Math.sqrt((driveX * driveX) + (driveY * driveY));
 
         driveX = leftVelocity((robotVelocity));
         driveY = rightVelocity(robotVelocity);
@@ -296,26 +291,27 @@ public class ControlledDrive extends OpMode {
     }
 
     public double leftVelocity(double robotVelocity){
-        double alpha = ((getPhi() + getError(0)) * Math.PI) / 8;
+        double alpha = ((getAngle() + getError(0)) * Math.PI) / 8;
         return ( robotVelocity * (Math.sin(alpha) + Math.cos(alpha)) )/ Math.sqrt(2);
     }
 
     public double rightVelocity(double robotVelocity){
-        double alpha = ((getPhi() + getError(0)) * Math.PI) / 8;
+        double alpha = ((getAngle() + getError(0)) * Math.PI) / 8;
         return (robotVelocity * ( Math.cos(alpha) - Math.sin(alpha)) ) / Math.sqrt(2);
     }
 
-    public double getPhi(){
-        double  x = -gamepad1.left_stick_x;
+    public double getAngle(){
+        //pass in value for x and y?
+       double  x = -gamepad1.left_stick_x;
         double  y = gamepad1.left_stick_y;
         double angle  = Math.atan(x/y);
 
         if(y <= 0){
             if(x < 0){
-                angle -= Math.PI;
-            }
+                    angle -= Math.PI;
+                }
             else{
-                angle += Math.PI;
+                    angle += Math.PI;
             }
 
             if(x == 0 && y == 0){
