@@ -29,16 +29,11 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.drawable.GradientDrawable;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -81,7 +76,7 @@ public class ControlledDrive extends OpMode {
     private double velocityRightX;
     private double velocityRightY;
 
-    private double robotVelocity;
+    private double robotVelocityMag;
     private double robotAngleError;
 
     private double phi;
@@ -100,6 +95,7 @@ public class ControlledDrive extends OpMode {
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
         gyro = hardwareMap.get(BNO055IMU.class, "gyro");
+
         /*
          * Code to run ONCE when the driver hits INIT
          */
@@ -153,7 +149,7 @@ public class ControlledDrive extends OpMode {
         stoneStop = hardwareMap.get(DigitalChannel.class, "stoneStop");
         stoneStop.setMode(DigitalChannel.Mode.INPUT);
 
-        telemetry.addData(">", "Calibrating Gyro");    //
+        telemetry.addData(">", "Calibrating Gyro");
         telemetry.update();
 
         gyro.initialize(parameters);
@@ -186,13 +182,12 @@ public class ControlledDrive extends OpMode {
     }
 
 
+    /*
+     * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
+     */
+
     @Override
     public void loop() {
-
-        /*
-         * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-         */
-
         double control = 2;
 
         if (gamepad1.right_bumper) {
@@ -201,20 +196,24 @@ public class ControlledDrive extends OpMode {
             control = 1;
         }
 
-        double driveY = gamepad1.left_stick_y;
-        double driveX = -gamepad1.left_stick_x;
-        double turn = -gamepad1.right_stick_x;
+        double leftStickY = -gamepad1.left_stick_y; // Get the Y position of left gamepad stick
+        double leftStickX = gamepad1.left_stick_x; // Get the X position of left gamepad stick
+        double turn = -gamepad1.right_stick_x; // Get the X position of right gamepad stick
 
-        robotVelocity = Math.sqrt((driveX * driveX) + (driveY + driveY));
+        // Set the velocity of the robot to how far the left gamepad stick is being pressed
+        robotVelocityMag = Math.sqrt((leftStickX * leftStickX) + (leftStickY * leftStickY));
 
-        driveX = leftVelocity((robotVelocity));
-        driveY = rightVelocity(robotVelocity);
+        // Set the angle of the robot to the angle of the left gamepad stick
+        double robotVelocityAng = getAngle(leftStickX, leftStickY) + Math.toRadians(getError(0));
+
+        double motorX = Math.cos(robotVelocityAng) * robotVelocityMag;
+        double motorY = Math.sin(robotVelocityAng) * robotVelocityMag;
 
 
-        double leftFrontPower = Range.clip((driveY + driveX) + turn, -1.0, 1.0);
-        double leftRearPower = Range.clip((driveY - driveX) + turn, -1.0, 1.0);
-        double rightFrontPower = Range.clip((driveY - driveX) - turn, -1.0, 1.0);
-        double rightRearPower = Range.clip((driveY + driveX) - turn, -1.0, 1.0);
+        double leftFrontPower = Range.clip((motorY + motorX) + turn, -1.0, 1.0);
+        double leftRearPower = Range.clip((motorY - motorX) + turn, -1.0, 1.0);
+        double rightFrontPower = Range.clip((motorY - motorX) - turn, -1.0, 1.0);
+        double rightRearPower = Range.clip((motorY + motorX) - turn, -1.0, 1.0);
 
         leftFront.setPower(leftFrontPower / control);
         leftRear.setPower(leftRearPower / control);
@@ -295,43 +294,37 @@ public class ControlledDrive extends OpMode {
         }
     }
 
-    public double leftVelocity(double robotVelocity){
-        double alpha = ((getPhi() + getError(0)) * Math.PI) / 8;
-        return ( robotVelocity * (Math.sin(alpha) + Math.cos(alpha)) )/ Math.sqrt(2);
-    }
+    /**
+     * Takes the x and y position of the left gamepad stick and outputs its angle.
+     * @param x The x position
+     * @param y The y position
+     * @return The angle
+     */
+    public double getAngle(double x, double y){
+        double angle = Math.atan(x/y);
 
-    public double rightVelocity(double robotVelocity){
-        double alpha = ((getPhi() + getError(0)) * Math.PI) / 8;
-        return (robotVelocity * ( Math.cos(alpha) - Math.sin(alpha)) ) / Math.sqrt(2);
-    }
-
-    public double getPhi(){
-        double  x = -gamepad1.left_stick_x;
-        double  y = gamepad1.left_stick_y;
-        double angle  = Math.atan(x/y);
-
-        if(y <= 0){
-            if(x < 0){
+        if (y <= 0) {
+            if (x < 0) {
                 angle -= Math.PI;
             }
-            else{
+            else {
                 angle += Math.PI;
             }
-
-            if(x == 0 && y == 0){
-                angle = 0;
-            }
         }
+
+        if (x==0 && y==0){
+            angle = 0;
+        }
+
         return -angle;
     }
 
 
+    /**
+     * Code to run ONCE after the driver hits STOP, to stop all motion
+     */
     @Override
     public void stop() {
-
-        /*
-         * Code to run ONCE after the driver hits STOP
-         */
         // stop all motion
         leftFront.setPower(0);
         leftRear.setPower(0);
@@ -341,14 +334,10 @@ public class ControlledDrive extends OpMode {
         leftIntake.setPower(0);
         rightIntake.setPower(0);
         // Return claw to normal position
-
-        /*
-         * Stop all motion
-         */
-
     }
 
     public double getError(double targetAngle) {
+
 
         double robotError;
 
@@ -366,6 +355,7 @@ public class ControlledDrive extends OpMode {
             Thread.currentThread().interrupt();
         }
     }
+
     public final void idle(){
         Thread.yield();
     }
