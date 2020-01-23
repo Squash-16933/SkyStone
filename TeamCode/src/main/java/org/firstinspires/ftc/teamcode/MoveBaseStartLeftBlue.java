@@ -264,7 +264,6 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
                 rampUpSpeed += SPEED_INCR;
             }
 
-
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
                     (leftFront.isBusy() && leftRear.isBusy() && rightFront.isBusy() && rightRear.isBusy())) {
