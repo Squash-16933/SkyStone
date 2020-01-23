@@ -29,17 +29,20 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name="SQUISH", group="Iterative Opmode")
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
+@TeleOp(name="SQUISH-Heading", group="Iterative Opmode")
 public class ControlledDrive extends OpMode {
 
     /*
@@ -47,27 +50,29 @@ public class ControlledDrive extends OpMode {
      * create DcMotors, controllers, and servos
      */
 
-    final double speedIncr = 0.01;
+    private BNO055IMU gyro;
+    private Orientation angles;
+    private Acceleration gravity;
+    private BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
-    private DcMotor leftFront = null;   // white  - Hub 2 port 2
-    private DcMotor leftRear = null;    // yellow - Hub 2 port 1
-    private DcMotor rightFront = null;  // green  - Hub 2 port 3
-    private DcMotor rightRear = null;   // blue   - Hub 2 port 0
+    private DcMotor leftFront = null;   // white - port 2
+    private DcMotor leftRear = null;    // yellow - port 1
+    private DcMotor rightFront = null;  // green - port 3
+    private DcMotor rightRear = null;   // blue - port 0
 
-    private Servo rightTwist = null;    // Hub 2 - Port 0
-    private Servo leftTwist = null;     // Hub 2 - Port 1
+    private boolean isStart = false;
 
-    private Servo rampServo = null;     // Hub 2 - Port 2
-    private double rampPos = 0.4;
-
-    private DcMotor rightIntake = null; // port 0
-    private DcMotor leftIntake = null; // port 1
-
-    private DigitalChannel stoneStop = null;
-    private static final double RAMP_SERVO_INCREMENT = 0.001;
-
-    private double setPowerTimeMax = 0;
-
+//    private Servo rightTwist = null;
+//    private Servo leftTwist = null;
+//
+//    private Servo rampServo = null;
+//    private double rampPos = 0.4;
+//
+//    private DcMotor rightIntake = null; // port 0
+//    private DcMotor leftIntake = null; // port 1
+//
+//    private DigitalChannel stoneStop = null;
+//    private static final double RAMP_SERVO_INCREMENT = 0.001;
 
     @Override
     public void init() {
@@ -75,19 +80,24 @@ public class ControlledDrive extends OpMode {
         /*
          * Code to run ONCE when the driver hits INIT
          */
+
+        parameters.angleUnit           = BNO055IMU.AngleUnit.RADIANS;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        gyro = hardwareMap.get(BNO055IMU.class, "gyro");
+
+        /*
+         * Declare drive train motors
+         */
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
 
-        rightTwist = hardwareMap.get(Servo.class, "rightTwist");
-        leftTwist = hardwareMap.get(Servo.class, "leftTwist");
-
-        rampServo = hardwareMap.get(Servo.class, "rampServo");
-        rampServo.setPosition(rampPos);
-
-        rightIntake = hardwareMap.get(DcMotor.class, "rightIntake");
-        leftIntake = hardwareMap.get(DcMotor.class, "leftIntake");
         /*
          * Initialize motors, servos, and controllers with hardwareMap
          */
@@ -107,23 +117,18 @@ public class ControlledDrive extends OpMode {
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        //Intake setup
-        rightIntake.setDirection(DcMotor.Direction.FORWARD);
-        leftIntake.setDirection(DcMotor.Direction.REVERSE);
+        // Send telemetry message to alert driver that we are calibrating;
+        telemetry.addData(">", "Calibrating Gyro");    //
+        telemetry.update();
 
+        //gyro.calibrate();
+        gyro.initialize(parameters);
+        // make sure the gyro is calibrated before continuing
+        while (!isStart && gyro.isGyroCalibrated())  {
+            sleep(50);
+            idle();
+        }
 
-        rightIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        rightIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        // set twisters to up position
-        rightTwist.setPosition(0);
-        leftTwist.setPosition(1);
-
-        //Intake stopper
-        stoneStop = hardwareMap.get(DigitalChannel.class, "stoneStop");
-        stoneStop.setMode(DigitalChannel.Mode.INPUT);
     }
 
 
@@ -134,9 +139,9 @@ public class ControlledDrive extends OpMode {
          * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
          */
 
-        /*
-         * Set initial servo positions
-         */
+        telemetry.addLine("Waiting to start");
+        telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
+        telemetry.update();
 
     }
 
@@ -148,6 +153,8 @@ public class ControlledDrive extends OpMode {
          * Code to run ONCE when the driver hits PLAY
          */
 
+        isStart = true;
+
     }
 
 
@@ -158,13 +165,13 @@ public class ControlledDrive extends OpMode {
          * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
          */
 
+        double desiredHeading;
         double velocityMag;
         double velocityAng;
-        double control = 2;
-        double setPowerTime;
+        double control = 1.75;
 
         if (gamepad1.right_bumper) {
-            control = 4;
+            control = 3;
         } else if (gamepad1.left_bumper) {
             control = 1;
         }
@@ -174,7 +181,7 @@ public class ControlledDrive extends OpMode {
         double turn   =  gamepad1.right_stick_x;
 
         velocityMag = Math.sqrt((driveX*driveX)+(driveY*driveY));
-        velocityAng = findAngle(driveX, driveY);
+        velocityAng = findAngle(driveX, driveY) + getError(0);
 
         driveX = velocityMag * Math.cos(velocityAng);
         driveY = velocityMag * Math.sin(velocityAng);
@@ -185,94 +192,28 @@ public class ControlledDrive extends OpMode {
         double rightRearPower = Range.clip((driveX - driveY) - turn, -1.0, 1.0);
 
         telemetry.addData("Velocity", " magnitude = %f and angle = %f", velocityMag, velocityAng*180/Math.PI);
-        telemetry.addData("Speeds", " leftFront = %f, rightFront = %f, turn = %f", leftFrontPower, rightFrontPower, turn);
-
-        leftFrontPower /= control;
-        leftRearPower /= control;
-        rightFrontPower /= control;
-        rightRearPower /= control;
-
-        setPowerTime = getRuntime();
-        leftFront.setPower(leftFrontPower);
-        leftRear.setPower(leftRearPower);
-        rightFront.setPower(rightFrontPower);
-        rightRear.setPower(rightRearPower);
-        setPowerTime = getRuntime() - setPowerTime;
-        setPowerTimeMax = Math.max(setPowerTime, setPowerTimeMax);
-
-        telemetry.addData("Max setting power time = ", setPowerTimeMax);
-
-        /*
-         * Set controls on gamepads and update/set position of servos with delta variables
-         *
-         */
-
-        // twisters
-        if (gamepad1.dpad_down) {
-            rightTwist.setPosition(0.5);
-            leftTwist.setPosition(0.5);
-        } else if (gamepad1.dpad_up) {
-            rightTwist.setPosition(0);
-            leftTwist.setPosition(1);
-        }
-
-        //ramp servo
-        if (gamepad2.y) {
-            //rampPos += RAMP_SERVO_INCREMENT;
-            rampPos = 1;
-        } else if (gamepad2.a) {
-            //rampPos -= RAMP_SERVO_INCREMENT;
-            rampPos = 0.2;
-        } else if (gamepad2.x) {
-            rampPos = 0.45;
-        }
-        else if(gamepad2.b){
-            rampPos = 0.7;
-        }
-//        if (rampPos > 1) {
-//            rampPos = 1;
-//        } else if (rampPos < 0) {
-//            rampPos = 0;
-//        }
-        telemetry.addData("Ramp Position", rampPos);
+        telemetry.addData("Speeds", " leftFront = %f and rightFront = %f", leftFrontPower, rightFrontPower);
         telemetry.update();
-        rampServo.setPosition(rampPos);
 
-        //Intake/Outtake
-        if(gamepad2.left_trigger>0) {
-            if(stoneStop.getState() == false){
-                intake(true, false, gamepad2.right_trigger, true);
-            }
-            else{
-                intake(true, true, gamepad2.left_trigger, false);
-            }
-        }
-        else if(gamepad2.right_trigger>0) {
-                intake(true, false, gamepad2.right_trigger, false);
-        }
-        else{
-            leftIntake.setPower(0);
-            rightIntake.setPower(0);
-        }
-        telemetry.update();
+        leftFront.setPower(leftFrontPower / control);
+        leftRear.setPower(leftRearPower / control);
+        rightFront.setPower(rightFrontPower / control);
+        rightRear.setPower(rightRearPower / control);
 
     }
 
-    public void intake(boolean on, boolean in, float power, boolean stop) {
-        if (on == true) {
-            if (in) {
-                rightIntake.setPower(power);
-                leftIntake.setPower(power);
-            }
-            else if(stop == true){
-                rightIntake.setPower(0);
-                leftIntake.setPower(0);
-            }
-            else {
-                rightIntake.setPower(-power);
-                leftIntake.setPower(-power);
-            }
-        }
+    @Override
+    public void stop() {
+
+        /*
+         * Code to run ONCE after the driver hits STOP
+         */
+        // stop all motion
+        leftFront.setPower(0);
+        leftRear.setPower(0);
+        rightFront.setPower(0);
+        rightRear.setPower(0);
+
     }
 
     public double findAngle(double x, double y) {
@@ -294,26 +235,34 @@ public class ControlledDrive extends OpMode {
         return -angle;
     }
 
-    @Override
-    public void stop() {
+    /**
+     * getError determines the error between the target angle and the robot's current heading
+     * @param   targetAngle  Desired angle (relative to global reference established at last Gyro Reset).
+     * @return  error angle: Degrees in the range +/- 180. Centered on the robot's frame of reference
+     *          +ve error means the robot should turn LEFT (CCW) to reduce error.
+     */
+    public double getError(double targetAngle) {
 
-        /*
-         * Code to run ONCE after the driver hits STOP
-         */
-        // stop all motion
-        leftFront.setPower(0);
-        leftRear.setPower(0);
-        rightFront.setPower(0);
-        rightRear.setPower(0);
+        double robotError;
 
-        leftIntake.setPower(0);
-        rightIntake.setPower(0);
-        // Return claw to normal position
-
-        /*
-         * Stop all motion
-         */
-
+        // calculate error in -179 to +180 range  (
+        robotError = targetAngle - gyro.getAngularOrientation().firstAngle;
+        while (robotError > Math.PI)  robotError -= 2*Math.PI;
+        while (robotError <= -Math.PI) robotError += 2*Math.PI;
+        return robotError;
     }
 
+    public final void sleep(long milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public final void idle() {
+        // Otherwise, yield back our thread scheduling quantum and give other threads at
+        // our priority level a chance to run
+        Thread.yield();
+    }
 }
