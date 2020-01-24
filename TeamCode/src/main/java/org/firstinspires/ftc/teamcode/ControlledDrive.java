@@ -115,10 +115,10 @@ public class ControlledDrive extends OpMode {
         /*
          * Initialize motors, servos, and controllers with hardwareMap
          */
-        leftFront.setDirection(DcMotor.Direction.FORWARD);
-        leftRear.setDirection(DcMotor.Direction.FORWARD);
-        rightFront.setDirection(DcMotor.Direction.REVERSE);
-        rightRear.setDirection(DcMotor.Direction.REVERSE);
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        leftRear.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        rightRear.setDirection(DcMotor.Direction.FORWARD);
 
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -178,6 +178,7 @@ public class ControlledDrive extends OpMode {
         /*
          * Code to run ONCE when the driver hits PLAY
          */
+
 
     }
 
@@ -240,12 +241,12 @@ public class ControlledDrive extends OpMode {
             rampPos = 1;
         } else if (gamepad2.a) {
             //rampPos -= RAMP_SERVO_INCREMENT;
-            rampPos = 0;
+            rampPos = 0.175;
         } else if (gamepad2.x) {
-            rampPos = 0.45;
+            rampPos = 0.8;
         }
         else if(gamepad2.b){
-            rampPos = 0.6;
+            rampPos = 0.45;
         }
 
 //        if (rampPos > 1) {

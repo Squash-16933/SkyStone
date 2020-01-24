@@ -612,18 +612,18 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         baseGrabbers(true);
         gyroHold(turnSpeed, 0, 1);
 
-        gyroTurn(baseTurnSpeed, 65);
-        gyroHold(turnSpeed, 65, 1);
-        gyroStrafe(baseDriveSpeed, SPEED_INCR,-50, 65); //Increased speed when moving base to account for the "heaviness"
+        gyroTurn(baseTurnSpeed, 55);
+        gyroHold(turnSpeed, 55, 1);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR,-50, 55); //Increased speed when moving base to account for the "heaviness"
 
-        gyroHold(turnSpeed, 45, 1);
+        gyroHold(turnSpeed, 55, 1);
 
 //        gyroTurn(baseTurnSpeed, 90);
 //        gyroHold(turnSpeed, 90, 1);
 
         baseGrabbers(false);
 
-        gyroDrive(driveSpeed, SPEED_INCR, -50, 45);
+        gyroDrive(driveSpeed, SPEED_INCR, -45, 45);
         //gyroHold(turnSpeed, 0, 1);
 
        gyroTurn(turnSpeed, 0);

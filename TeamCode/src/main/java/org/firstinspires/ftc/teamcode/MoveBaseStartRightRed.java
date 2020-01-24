@@ -185,7 +185,7 @@ public class MoveBaseStartRightRed extends LinearOpMode {
 
 
         //PLACE ROBOT SO FRONT IS AGAINST THE WALL
-        moveBaseStartRight(0.7, 0.5, 0.9, 0.7);
+        moveBaseStartRight(0.7, 0.5, 0.9, 0.6);
 
 
         // Commented these out as they would slow down the code.  To be used for debugging only
@@ -589,36 +589,37 @@ public class MoveBaseStartRightRed extends LinearOpMode {
         // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
         // TO TURN LEFT MAKE THE ANGLE POSITIVE
         gyroDrive(driveSpeed, SPEED_INCR, 5, 0);
-        gyroHold(turnSpeed, 0, 1);
+        gyroHold(turnSpeed, 0, 0.5);
 
         gyroTurn( 0.5, 180);
-        gyroHold(turnSpeed,180, 1);
+        gyroHold(turnSpeed,180, 0.5);
 
         gyroDrive(driveSpeed, SPEED_INCR, -43, 180);
-        gyroHold(turnSpeed, 180, 1);
+        gyroHold(turnSpeed, 180, 0.5);
 
         gyroStrafe(driveSpeed, SPEED_INCR, -7, 180);
-        gyroHold(turnSpeed, 180, 1);
+        gyroHold(turnSpeed, 180, 0.5);
 
         baseGrabbers(true);
-        gyroHold(turnSpeed, 180, 1);
+        gyroHold(turnSpeed, 180, 0.5);
 
-        gyroTurn(baseTurnSpeed, 135);
-        gyroHold(turnSpeed, 135, 1);
-        gyroStrafe(baseDriveSpeed, SPEED_INCR,-50, 135); //Increased speed when moving base to account for the "heaviness"
+        gyroTurn(baseTurnSpeed, 125);
+        gyroHold(turnSpeed, 125, 0.5);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR,-45, 125); //Increased speed when moving base to account for the "heaviness"
 
-        gyroHold(turnSpeed, 135, 1);
+        gyroHold(turnSpeed, 125, 0.5);
 
         baseGrabbers(false);
 
 //        gyroTurn(turnSpeed, -115);
 //        gyroHold(turnSpeed, -45, 1);
 
-        gyroDrive(driveSpeed, SPEED_INCR, 50, 135);
+        gyroDrive(driveSpeed, SPEED_INCR, 55, 125);
 
 //
         gyroTurn(turnSpeed, 0);
         gyroDrive(driveSpeed, SPEED_INCR, -5, 0);
+        gyroHold(turnSpeed, 0, 3);
 //        gyroStrafe(driveSpeed, SPEED_INCR, 3, 180);
 
     }
