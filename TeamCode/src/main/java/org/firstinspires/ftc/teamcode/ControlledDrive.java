@@ -196,9 +196,9 @@ public class ControlledDrive extends OpMode {
             control = 1;
         }
 
-        double leftStickY = -gamepad1.left_stick_y; // Get the Y position of left gamepad stick
-        double leftStickX = gamepad1.left_stick_x; // Get the X position of left gamepad stick
-        double turn = -gamepad1.right_stick_x; // Get the X position of right gamepad stick
+        double leftStickY = -gamepad1.left_stick_y;  // Get the Y position of left gamepad stick
+        double leftStickX =  gamepad1.left_stick_x;  // Get the X position of left gamepad stick
+        double turn   =  gamepad1.right_stick_x; // Get the X position of right gamepad stick
 
         // Set the velocity of the robot to how far the left gamepad stick is being pressed
         robotVelocityMag = Math.sqrt((leftStickX * leftStickX) + (leftStickY * leftStickY));
@@ -210,10 +210,10 @@ public class ControlledDrive extends OpMode {
         double motorY = Math.sin(robotVelocityAng) * robotVelocityMag;
 
 
-        double leftFrontPower = Range.clip((motorY + motorX) + turn, -1.0, 1.0);
-        double leftRearPower = Range.clip((motorY - motorX) + turn, -1.0, 1.0);
-        double rightFrontPower = Range.clip((motorY - motorX) - turn, -1.0, 1.0);
-        double rightRearPower = Range.clip((motorY + motorX) - turn, -1.0, 1.0);
+        double leftFrontPower  = Range.clip((motorX - motorY) + turn, -1.0, 1.0);
+        double rightFrontPower = Range.clip((motorX + motorY) - turn, -1.0, 1.0);
+        double leftRearPower   = Range.clip((motorX + motorY) + turn, -1.0, 1.0);
+        double rightRearPower  = Range.clip((motorX - motorY) - turn, -1.0, 1.0);
 
         leftFront.setPower(leftFrontPower / control);
         leftRear.setPower(leftRearPower / control);
