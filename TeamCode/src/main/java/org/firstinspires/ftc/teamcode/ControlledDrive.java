@@ -196,7 +196,13 @@ public class ControlledDrive extends OpMode {
         } else if (gamepad1.left_bumper) {
             control = 1;
         }
-
+        if (rampPos >= 0.15 && rampPos <= 1) {
+            if (gamepad2.dpad_up) {
+            rampPos+=0.02;
+            } else if (gamepad2.dpad_down) {
+            rampPos-=0.02;
+            }
+        }
         double leftStickY = -gamepad1.left_stick_y;  // Get the Y position of left gamepad stick
         double leftStickX =  gamepad1.left_stick_x;  // Get the X position of left gamepad stick
         double turn   =  gamepad1.right_stick_x; // Get the X position of right gamepad stick
