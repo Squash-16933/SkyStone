@@ -185,7 +185,7 @@ public class MoveBaseStartRightRed extends LinearOpMode {
 
 
         //PLACE ROBOT SO FRONT IS AGAINST THE WALL
-        moveBaseStartRight(0.7, 0.5, 0.9, 0.6);
+        moveBaseStartRight(0.7, 0.5, 0.9, 0.7);
 
 
         // Commented these out as they would slow down the code.  To be used for debugging only
@@ -589,37 +589,40 @@ public class MoveBaseStartRightRed extends LinearOpMode {
         // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
         // TO TURN LEFT MAKE THE ANGLE POSITIVE
         gyroDrive(driveSpeed, SPEED_INCR, 5, 0);
-        gyroHold(turnSpeed, 0, 0.5);
+        gyroHold(turnSpeed, 0, 0.25);
 
         gyroTurn( 0.5, 180);
-        gyroHold(turnSpeed,180, 0.5);
+        gyroHold(turnSpeed,180, 0.25);
 
         gyroDrive(driveSpeed, SPEED_INCR, -43, 180);
-        gyroHold(turnSpeed, 180, 0.5);
+        gyroHold(turnSpeed, 180, 0.25);
 
         gyroStrafe(driveSpeed, SPEED_INCR, -7, 180);
-        gyroHold(turnSpeed, 180, 0.5);
+        gyroHold(turnSpeed, 180, 0.25);
 
         baseGrabbers(true);
-        gyroHold(turnSpeed, 180, 0.5);
+        gyroHold(turnSpeed, 180, 0.25);
 
-        gyroTurn(baseTurnSpeed, 125);
-        gyroHold(turnSpeed, 125, 0.5);
-        gyroStrafe(baseDriveSpeed, SPEED_INCR,-45, 125); //Increased speed when moving base to account for the "heaviness"
+        gyroTurn(baseTurnSpeed, 115);
+        gyroHold(turnSpeed, 115, 0.25);
+        gyroStrafe(baseDriveSpeed, SPEED_INCR,-45, 115); //Increased speed when moving base to account for the "heaviness"
 
-        gyroHold(turnSpeed, 125, 0.5);
+        gyroHold(turnSpeed, 115, 0.25);
 
         baseGrabbers(false);
 
 //        gyroTurn(turnSpeed, -115);
 //        gyroHold(turnSpeed, -45, 1);
 
-        gyroDrive(driveSpeed, SPEED_INCR, 55, 125);
+        gyroDrive(driveSpeed, SPEED_INCR, 55, 155);
 
 //
         gyroTurn(turnSpeed, 0);
-        gyroDrive(driveSpeed, SPEED_INCR, -5, 0);
-        gyroHold(turnSpeed, 0, 3);
+        gyroDrive(driveSpeed, SPEED_INCR, -12, 0);
+        gyroHold(turnSpeed, 0, 0.25);
+
+        gyroStrafe(turnSpeed, SPEED_INCR, -10, 0);
+        gyroHold(turnSpeed, 0, 1);
 //        gyroStrafe(driveSpeed, SPEED_INCR, 3, 180);
 
     }

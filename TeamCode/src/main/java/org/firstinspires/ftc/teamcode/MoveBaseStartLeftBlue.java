@@ -603,7 +603,7 @@ public class MoveBaseStartLeftBlue extends LinearOpMode {
         // TO TURN RIGHT MAKE THE ANGLE NEGATIVE
         // TO TURN LEFT MAKE THE ANGLE POSITIVE
 
-        gyroDrive(driveSpeed, SPEED_INCR,48, 0);
+        gyroDrive(driveSpeed, SPEED_INCR,49, 0);
         gyroHold(turnSpeed, 0, 1);
 
         gyroStrafe(baseDriveSpeed, SPEED_INCR, -7, 0);
