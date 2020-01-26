@@ -225,6 +225,12 @@ public class ControlledDrive extends OpMode {
          * Set controls on gamepads and update/set position of servos with delta variables
          *
          */
+            if(gamepad2.dpad_up && rampPos < 1){
+                rampPos += 0.02;
+            } else if(rampPos > 0.15 && gamepad2.dpad_down){
+                rampPos -= 0.02;
+            }
+
 
         // twisters
         if (gamepad1.dpad_down) {
@@ -243,10 +249,23 @@ public class ControlledDrive extends OpMode {
             //rampPos -= RAMP_SERVO_INCREMENT;
             rampPos = 0.15;
         } else if (gamepad2.x) {
-            rampPos = 0.8;
+            rampPos = 0.2;
         }
         else if(gamepad2.b){
             rampPos = 0.45;
+        }
+
+        if (gamepad1.a) {
+            telemetry.addData(">", "Calibrating Gyro");
+            telemetry.update();
+            gyro.initialize(parameters);
+            while(gyro.isGyroCalibrated()) {
+                sleep(50);
+                idle();
+            }
+            telemetry.addData("Heading: ", gyro.getAngularOrientation().firstAngle);
+            telemetry.update();
+            sleep(1000);
         }
 
 //        if (rampPos > 1) {
